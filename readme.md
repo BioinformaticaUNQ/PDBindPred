@@ -5,9 +5,9 @@ Herramienta de línea de comandos para recuperar información básica de estruct
 ## Uso
 
 ```bash
-python PDBindPred/main.py --pdb 6IK4
+python PDBindPred/main.py --pdb 1CY0
 ```
-
+6IK4
 #### Decisiones tomadas
 - Para mapear la id de PDB ingresada, se utilizó la API 
 de Uniprot; a partir de la id PDB, se busca la id de Uniprot, 
