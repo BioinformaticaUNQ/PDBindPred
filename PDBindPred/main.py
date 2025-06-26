@@ -25,6 +25,10 @@ def fetch_pdb_info(pdb_id):
         "source": "RCSB PDB"
     }
 
+"""
+Recibe una id PDB como string. Realiza un request para mapear la id 
+en Uniprot y devuelve la id Uniprot como string para el mismo elemento.
+"""
 def get_uniprot_id_from_pdb_id(pdb_id : str):
     uniprot_id_mapping_url = "https://rest.uniprot.org/idmapping/run"
     params_pdb_to_uniprot = {
@@ -36,13 +40,15 @@ def get_uniprot_id_from_pdb_id(pdb_id : str):
     pdb_to_uniprot_job_id = result_from_uniprot_id_mapping.json().get('jobId')
     pdb_to_uniprot_job_url = "https://rest.uniprot.org/idmapping/results/" + pdb_to_uniprot_job_id
 
-    response = requests.get(pdb_to_uniprot_job_url)
-    if not response.ok:
-        response.raise_for_status()
+    pdb_to_uniprot_job = requests.get(pdb_to_uniprot_job_url)
+    if not pdb_to_uniprot_job.ok:
+        pdb_to_uniprot_job.raise_for_status()
         sys.exit()
-    data = response.json()
 
-    return(data.get("results")[0].get("to"))
+    pdb_to_uniprot_data = pdb_to_uniprot_job.json()
+    id_uniprot = pdb_to_uniprot_data.get("results")[0].get("to")
+
+    return(id_uniprot)
 
 def main():
     parser = argparse.ArgumentParser(description="PDBindPred - Anotación básica de estructuras PDB")
