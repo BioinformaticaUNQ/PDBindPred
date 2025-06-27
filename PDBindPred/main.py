@@ -3,6 +3,7 @@ import requests
 import json
 import os
 import sys
+import xml.etree.ElementTree as ET
 
 def fetch_pdb_info(pdb_id):
     url = f"https://data.rcsb.org/rest/v1/core/entry/{pdb_id}"
@@ -15,13 +16,12 @@ def fetch_pdb_info(pdb_id):
     # Extraer campos básicos
     resolution = data.get("rcsb_entry_info", {}).get("resolution_combined", [None])[0]
     year = data.get("rcsb_accession_info", {}).get("initial_release_date", "")[:4]
-    ligand_info = [chem["chem_comp_id"] for chem in data.get("rcsb_nonpolymer_instance_feature_summary", [])]
     
     return {
         "pdb_id": pdb_id,
         "resolution": resolution,
         "year": year,
-        "ligands": ligand_info,
+        "ligands": [],
         "source": "RCSB PDB"
     }
 
@@ -75,6 +75,32 @@ def get_chembl_id_from_uniprot_id(uniprot_id : str):
 
     return(id_uniprot)
 
+import xml.etree.ElementTree as ET
+
+def get_ligands_from_chembl_target(chembl_target_id: str):
+    url = f"https://www.ebi.ac.uk/chembl/api/data/activity?target_chembl_id={chembl_target_id}&limit=100"
+    headers = {"Accept": "application/xml"}  # opcional, por claridad
+    response = requests.get(url, headers=headers)
+
+    if response.status_code != 200:
+        print(f"⚠️ No se pudo obtener datos desde ChEMBL para {chembl_target_id}")
+        return []
+
+    try:
+        root = ET.fromstring(response.text)
+    except ET.ParseError as e:
+        print(f"⚠️ Error al parsear XML: {e}")
+        return []
+
+    ligands = []
+    for activity in root.findall(".//molecule_chembl_id"):
+        ligand_id = activity.text
+        if ligand_id and ligand_id not in ligands:
+            ligands.append(ligand_id)
+
+    return ligands
+
+
 "Obtiene la id"
 def get_chembl_id_from_pdb_id(pdb_id : str):
     id_uniprot = get_uniprot_id_from_pdb_id(pdb_id)
@@ -88,15 +114,39 @@ def main():
 
     result = fetch_pdb_info(args.pdb)
 
+    # 🔽 Agregamos ID de UniProt y ChEMBL al resultado
+    chembl_id = None  # 🔧 Agregado para evitar error si el try falla
+    try:
+        uniprot_id = get_uniprot_id_from_pdb_id(args.pdb)
+        chembl_id = get_chembl_id_from_uniprot_id(uniprot_id)
+        result["uniprot_id"] = uniprot_id
+        result["chembl_id"] = chembl_id
+    except Exception as e:
+        print(f"⚠️  No se pudieron obtener los IDs UniProt/ChEMBL: {e}")
+        result["uniprot_id"] = None
+        result["chembl_id"] = None
+
+    
+
+    ligands = []
+    if chembl_id:
+        try:
+            ligands = get_ligands_from_chembl_target(chembl_id)
+        except Exception as e:
+            print(f"⚠️  Error al obtener ligandos desde ChEMBL: {e}")
+
+    # 👇 Agregamos al resultado antes de guardarlo
+    result["ligands"] = ligands
+
     os.makedirs("output", exist_ok=True)
     output_path = f"output/output_{args.pdb}.json"
     with open(output_path, "w") as f:
         json.dump(result, f, indent=4)
 
-    print(get_chembl_id_from_pdb_id(args.pdb))
-
     print(f"✅ Datos descargados para PDB ID {args.pdb}")
     print(f"💾 Resultado guardado en {output_path}")
+
+
 
 if __name__ == "__main__":
     main()

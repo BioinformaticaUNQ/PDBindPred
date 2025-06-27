@@ -1,7 +1,9 @@
 {
-    "pdb_id": "6IK4",
+    "pdb_id": "6ik4",
     "resolution": 1.9,
     "year": "2019",
     "ligands": [],
-    "source": "RCSB PDB"
+    "source": "RCSB PDB",
+    "uniprot_id": null,
+    "chembl_id": null
 }

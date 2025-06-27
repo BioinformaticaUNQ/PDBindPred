@@ -3,5 +3,7 @@
     "resolution": 1.82,
     "year": "2018",
     "ligands": [],
-    "source": "RCSB PDB"
+    "source": "RCSB PDB",
+    "uniprot_id": null,
+    "chembl_id": null
 }
