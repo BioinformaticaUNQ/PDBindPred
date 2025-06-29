@@ -77,9 +77,9 @@ def get_chembl_id_from_uniprot_id(uniprot_id : str):
 
 import xml.etree.ElementTree as ET
 
-def get_ligands_from_chembl_target(chembl_target_id: str):
+def get_ligands_from_chembl_target(chembl_target_id: str, affinity_types=None):
     url = f"https://www.ebi.ac.uk/chembl/api/data/activity?target_chembl_id={chembl_target_id}&limit=100"
-    headers = {"Accept": "application/xml"}  # opcional, por claridad
+    headers = {"Accept": "application/xml"}
     response = requests.get(url, headers=headers)
 
     if response.status_code != 200:
@@ -93,10 +93,29 @@ def get_ligands_from_chembl_target(chembl_target_id: str):
         return []
 
     ligands = []
-    for activity in root.findall(".//molecule_chembl_id"):
-        ligand_id = activity.text
-        if ligand_id and ligand_id not in ligands:
-            ligands.append(ligand_id)
+    for activity in root.findall(".//activity"):
+        chembl_id_elem = activity.find("molecule_chembl_id")
+        value_elem = activity.find("standard_value")
+        unit_elem = activity.find("standard_units")
+        type_elem = activity.find("standard_type")
+        year_elem = activity.find("document_year")
+
+        ligand_id = chembl_id_elem.text if chembl_id_elem is not None else None
+        value = value_elem.text if value_elem is not None else None
+        unit = unit_elem.text if unit_elem is not None else None
+        type_ = type_elem.text if type_elem is not None else None
+        year = year_elem.text if year_elem is not None else None
+
+        if ligand_id:
+            if affinity_types and type_ not in affinity_types:
+                continue
+            ligands.append({
+                "chembl_id": ligand_id,
+                "type": type_,
+                "value": value,
+                "unit": unit,
+                "year": year
+            })
 
     return ligands
 
@@ -110,6 +129,7 @@ def get_chembl_id_from_pdb_id(pdb_id : str):
 def main():
     parser = argparse.ArgumentParser(description="PDBindPred - Anotación básica de estructuras PDB")
     parser.add_argument("--pdb", required=True, help="ID de entrada PDB (ej: 6IK4)")
+    parser.add_argument("--aff", help="Tipos de afinidad a incluir (ej: Ki,Kd,IC50)")
     args = parser.parse_args()
 
     result = fetch_pdb_info(args.pdb)
@@ -126,12 +146,11 @@ def main():
         result["uniprot_id"] = None
         result["chembl_id"] = None
 
-    
-
     ligands = []
     if chembl_id:
         try:
-            ligands = get_ligands_from_chembl_target(chembl_id)
+            affinity_types = args.aff.split(",") if args.aff else None
+            ligands = get_ligands_from_chembl_target(chembl_id, affinity_types=affinity_types)
         except Exception as e:
             print(f"⚠️  Error al obtener ligandos desde ChEMBL: {e}")
 
