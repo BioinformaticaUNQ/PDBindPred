@@ -49,7 +49,7 @@ PDBindPred/output/
 ```
 
 Cada archivo de salida se llama:  
-`output_<ID>.json`
+`output_<ID>.json` 
 
 ## 🧪 Tests
 
