@@ -27,7 +27,7 @@ def fetch_pdb_info(pdb_id):
     }
 
 def get_ligands_from_chembl_target(chembl_target_id: str, affinity_types=None):
-    url = f"https://www.ebi.ac.uk/chembl/api/data/activity?target_chembl_id={chembl_target_id}&limit=100"
+    url = f"https://www.ebi.ac.uk/chembl/api/data/activity?target_chembl_id={chembl_target_id}&assay_type__exact=B&limit=100"
     headers = {"Accept": "application/xml"}
     response = requests.get(url, headers=headers)
 
