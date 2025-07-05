@@ -2,6 +2,8 @@ import argparse
 import os
 from argparse import RawTextHelpFormatter
 from PDBindPred.pdb_handler import process_pdb, process_uniprot
+from PDBindPred import config
+import time
 
 class CustomArgumentParser(argparse.ArgumentParser):
     def _get_optionals_title(self):
@@ -75,11 +77,23 @@ def main():
 
     affinity_types = args.aff.split(",") if args.aff else None
 
+    # Validar límite de IDs permitidos (configurable)
+    if len(uniprot_ids) > config.MAX_UNIPROT_IDS_PER_QUERY:
+        print(f"⚠️ Límite excedido: Máximo permitido de IDs UniProt por consulta: {config.MAX_UNIPROT_IDS_PER_QUERY}.")
+        print("🔗 Por favor, divida sus consultas en partes más pequeñas.")
+        return
+
+    if len(pdb_ids) > config.MAX_PDB_IDS_PER_QUERY:
+        print(f"⚠️ Límite excedido: Máximo permitido de IDs PDB por consulta: {config.MAX_PDB_IDS_PER_QUERY}.")
+        print("🔗 Por favor, divida sus consultas en partes más pequeñas.")
+        return
+
     if pdb_ids:
         print(f"🔍 Procesando {len(pdb_ids)} ID(s) de PDB...")
         for pdb_id in pdb_ids:
             try:
                 process_pdb(pdb_id, affinity_types)
+                time.sleep(config.CHEMBL_REQUEST_DELAY)
             except Exception as e:
                 print(f"❌ Error procesando PDB {pdb_id}: {e}")
 
@@ -88,6 +102,7 @@ def main():
         for uniprot_id in uniprot_ids:
             try:
                 process_uniprot(uniprot_id, affinity_types)
+                time.sleep(config.UNIPROT_REQUEST_DELAY)
             except Exception as e:
                 print(f"❌ Error procesando UniProt {uniprot_id}: {e}")
 
