@@ -11,4 +11,5 @@ MAX_CHEMBL_AFFINITY_TYPES = 1000  # No suele ser un problema en tu caso
 UNIPROT_REQUEST_DELAY = 0.5  # Medio segundo
 CHEMBL_REQUEST_DELAY = 0.5  # Opcional, si querés regular
 
-# Otros parámetros que quieras agregar más adelante...
+# ¿Habilitar cacheo local? Si es True, se usa el JSON local si ya existe
+ENABLE_LOCAL_CACHE = True

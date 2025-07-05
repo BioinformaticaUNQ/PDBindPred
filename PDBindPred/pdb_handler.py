@@ -3,6 +3,7 @@ import json
 import requests
 import xml.etree.ElementTree as ET
 from PDBindPred.get_ids import get_uniprot_id_from_pdb_id, get_chembl_id_from_uniprot_id
+from PDBindPred import config
 
 def fetch_pdb_info(pdb_id):
     url = f"https://data.rcsb.org/rest/v1/core/entry/{pdb_id}"
@@ -85,6 +86,16 @@ def get_ligands_from_chembl_target(chembl_target_id: str, affinity_types=None):
 
 
 def process_pdb(pdb_id, affinity_types):
+
+    package_dir = os.path.dirname(os.path.abspath(__file__))
+    output_dir = os.path.join(package_dir, "output")
+    os.makedirs(output_dir, exist_ok=True)
+    output_path = os.path.join(output_dir, f"pdb_{pdb_id}.json")
+
+    if config.ENABLE_LOCAL_CACHE and os.path.isfile(output_path):
+        print(f"📂 Resultado ya disponible localmente para PDB ID '{pdb_id}'. Se omitirá la consulta.")
+        return
+
     result = fetch_pdb_info(pdb_id)
 
     try:
@@ -120,6 +131,15 @@ def process_pdb(pdb_id, affinity_types):
 
 
 def process_uniprot(uniprot_id, affinity_types):
+    package_dir = os.path.dirname(os.path.abspath(__file__))
+    output_dir = os.path.join(package_dir, "output")
+    os.makedirs(output_dir, exist_ok=True)
+    output_path = os.path.join(output_dir, f"uniprot_{uniprot_id}.json")
+
+    if config.ENABLE_LOCAL_CACHE and os.path.isfile(output_path):
+        print(f"📂 Resultado ya disponible localmente para UniProt ID '{uniprot_id}'. Se omitirá la consulta.")
+        return
+
     print(f"🔗 Procesando UniProt ID '{uniprot_id}'...")
     result = {
         "uniprot_id": uniprot_id,
