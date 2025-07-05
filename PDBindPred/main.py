@@ -43,6 +43,21 @@ def main():
         with open(args.pdb_file, "r") as f:
             pdb_ids.extend([line.strip() for line in f if line.strip()])
 
+    pdb_ids = list(set(pdb_ids))
+
+    # Filtramos IDs inválidos (solo 4 caracteres alfanuméricos)
+    valid_pdb_ids = []
+    for pdb_id in pdb_ids:
+        if len(pdb_id) == 4 and pdb_id.isalnum():
+            valid_pdb_ids.append(pdb_id)
+        else:
+            print(f"⚠️ ID inválido: {pdb_id} (se ignorará)")
+
+    if not valid_pdb_ids:
+        print("❌ No hay IDs válidos para procesar.")
+        return
+
+    pdb_ids = valid_pdb_ids
 
     affinity_types = args.aff.split(",") if args.aff else None
 

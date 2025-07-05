@@ -17,7 +17,7 @@ def fetch_pdb_info(pdb_id):
     return {
         "pdb_id": pdb_id,
         "resolution": resolution,
-        "year": year,
+        "publication_year": year,
         "ligands": [],
         "source": "RCSB PDB"
     }
@@ -41,31 +41,42 @@ def get_ligands_from_chembl_target(chembl_target_id: str, affinity_types=None):
     for activity in root.findall(".//activity"):
         chembl_id_elem = activity.find("molecule_chembl_id")
         value_elem = activity.find("standard_value")
-        unit_elem = activity.find("standard_units")
         type_elem = activity.find("standard_type")
         year_elem = activity.find("document_year")
         assay_chembl_id_elem = activity.find("assay_chembl_id")
 
         ligand_id = chembl_id_elem.text if chembl_id_elem is not None else None
         value = value_elem.text if value_elem is not None else None
-        unit = unit_elem.text if unit_elem is not None else None
         type_ = type_elem.text if type_elem is not None else None
         year = year_elem.text if year_elem is not None else None
-        assay_chembl_id = assay_chembl_id_elem.text if assay_chembl_id_elem is not None else None
+        assay_id = assay_chembl_id_elem.text if assay_chembl_id_elem is not None else None
 
-        if ligand_id:
-            if affinity_types and type_ not in affinity_types:
-                continue
-            ligand_assay_data = {"assay id": assay_chembl_id,"type": type_, "value": value, "unit": unit, "year": year}
-            ligand = next((sub for sub in ligands if sub['chembl_id'] == ligand_id), None)
-            if ligand is None:
-                ligands.append({
-                    "chembl_id": ligand_id,
-                    "assays": [ligand_assay_data]
-                })
-            else:
-                ligand["assays"].append(ligand_assay_data)
+        if not ligand_id or not assay_id or not type_ or not value:
+            continue  # ignoramos datos incompletos
+
+        if affinity_types and type_ not in affinity_types:
+            continue
+
+        # Buscamos el ligando
+        ligand = next((lig for lig in ligands if lig["chembl_id"] == ligand_id), None)
+        if ligand is None:
+            ligand = {"chembl_id": ligand_id, "assays": []}
+            ligands.append(ligand)
+
+        # Buscamos el assay dentro del ligando
+        assay = next((assay for assay in ligand["assays"] if assay["assay id"] == assay_id), None)
+        if assay is None:
+            assay = {"assay id": assay_id, "publication_year": year}
+            ligand["assays"].append(assay)
+
+        # Agregamos el tipo como propiedad dinámica
+        try:
+            assay[type_] = float(value)
+        except ValueError:
+            assay[type_] = value  # por si no es numérico
+
     return ligands
+
 
 def process_pdb(pdb_id, affinity_types):
     result = fetch_pdb_info(pdb_id)
