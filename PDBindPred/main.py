@@ -34,6 +34,7 @@ def validar_uniprot_ids(ids):
     return list(set(valid))
 
 def main():
+    print("\n🚀 Inicio de ejecución de PDBindPred\n")
     parser = CustomArgumentParser(
         description="PDBindPred - Anotación básica de estructuras PDB",
         epilog="""
@@ -105,6 +106,11 @@ def main():
                 time.sleep(config.UNIPROT_REQUEST_DELAY)
             except Exception as e:
                 print(f"❌ Error procesando UniProt {uniprot_id}: {e}")
+    
+    print("\n🏁 Ejecución completada\n")
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except Exception as e:
+        print(f"❌ Error inesperado: {e}")

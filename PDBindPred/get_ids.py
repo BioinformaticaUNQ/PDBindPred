@@ -3,56 +3,81 @@ import requests
 
 """
 Recibe una id PDB como string. Realiza un request para mapear la id 
-en Uniprot y devuelve la id Uniprot como string para el mismo elemento.
+en UniProt y devuelve la id UniProt como string para el mismo elemento.
 """
-def get_uniprot_id_from_pdb_id(pdb_id : str):
+def get_uniprot_id_from_pdb_id(pdb_id: str):
     uniprot_id_mapping_url = "https://rest.uniprot.org/idmapping/run"
     params_pdb_to_uniprot = {
         "from": "PDB",
         "to": "UniProtKB",
         "ids": pdb_id
     }
-    result_from_uniprot_id_mapping = requests.post(uniprot_id_mapping_url, data=params_pdb_to_uniprot)
-    pdb_to_uniprot_job_id = result_from_uniprot_id_mapping.json().get('jobId')
-    pdb_to_uniprot_job_url = "https://rest.uniprot.org/idmapping/results/" + pdb_to_uniprot_job_id
 
-    pdb_to_uniprot_job = requests.get(pdb_to_uniprot_job_url)
-    if not pdb_to_uniprot_job.ok:
-        pdb_to_uniprot_job.raise_for_status()
+    print(f"📡 Enviando consulta para mapear PDB ID '{pdb_id}' a UniProt...")
+    try:
+        result = requests.post(uniprot_id_mapping_url, data=params_pdb_to_uniprot, timeout=10)
+        result.raise_for_status()
+    except requests.RequestException as e:
+        print(f"❌ Error al solicitar el mapeo PDB -> UniProt: {e}")
         sys.exit()
 
-    pdb_to_uniprot_data = pdb_to_uniprot_job.json()
-    id_uniprot = pdb_to_uniprot_data.get("results")[0].get("to")
+    job_id = result.json().get('jobId')
+    job_url = f"https://rest.uniprot.org/idmapping/results/{job_id}"
 
-    return(id_uniprot)
+    print(f"⏳ Recuperando resultados de mapeo (Job ID: {job_id})...")
+    try:
+        job_result = requests.get(job_url, timeout=10)
+        job_result.raise_for_status()
+    except requests.RequestException as e:
+        print(f"❌ Error al recuperar resultados del mapeo: {e}")
+        sys.exit()
+
+    data = job_result.json()
+    id_uniprot = data.get("results")[0].get("to")
+
+    print(f"✅ UniProt ID obtenido para PDB ID '{pdb_id}': {id_uniprot}")
+
+    return id_uniprot
 
 """
-Recibe una id Uniprot como string. Realiza un request para mapear la id 
-en Uniprot y devuelve la id ChEMBL como string para el mismo elemento.
+Recibe una id UniProt como string. Realiza un request para mapear la id 
+en ChEMBL y devuelve la id ChEMBL como string para el mismo elemento.
 """
-def get_chembl_id_from_uniprot_id(uniprot_id : str):
+def get_chembl_id_from_uniprot_id(uniprot_id: str):
     uniprot_id_mapping_url = "https://rest.uniprot.org/idmapping/run"
     params_uniprot_to_chembl = {
         "from": "UniProtKB_AC-ID",
         "to": "ChEMBL",
         "ids": uniprot_id
     }
-    result_from_uniprot_id_mapping = requests.post(uniprot_id_mapping_url, data=params_uniprot_to_chembl)
-    uniprot_to_chembl_job_id = result_from_uniprot_id_mapping.json().get('jobId')
-    uniprot_to_chembl_job_url = "https://rest.uniprot.org/idmapping/results/" + uniprot_to_chembl_job_id
 
-    uniprot_to_chembl_job = requests.get(uniprot_to_chembl_job_url)
-    if not uniprot_to_chembl_job.ok:
-        uniprot_to_chembl_job.raise_for_status()
+    print(f"📡 Enviando consulta para mapear UniProt ID '{uniprot_id}' a ChEMBL...")
+    try:
+        result = requests.post(uniprot_id_mapping_url, data=params_uniprot_to_chembl, timeout=10)
+        result.raise_for_status()
+    except requests.RequestException as e:
+        print(f"❌ Error al solicitar el mapeo UniProt -> ChEMBL: {e}")
         sys.exit()
 
-    uniprot_to_chembl_data = uniprot_to_chembl_job.json()
-    id_chembl = uniprot_to_chembl_data.get("results")[0].get("to")
+    job_id = result.json().get('jobId')
+    job_url = f"https://rest.uniprot.org/idmapping/results/{job_id}"
 
-    return(id_chembl)
+    print(f"⏳ Recuperando resultados de mapeo (Job ID: {job_id})...")
+    try:
+        job_result = requests.get(job_url, timeout=10)
+        job_result.raise_for_status()
+    except requests.RequestException as e:
+        print(f"❌ Error al recuperar resultados del mapeo: {e}")
+        sys.exit()
 
+    data = job_result.json()
+    id_chembl = data.get("results")[0].get("to")
 
-def get_chembl_id_from_pdb_id(pdb_id : str):
+    print(f"✅ ChEMBL ID obtenido para UniProt ID '{uniprot_id}': {id_chembl}")
+
+    return id_chembl
+
+def get_chembl_id_from_pdb_id(pdb_id: str):
     id_uniprot = get_uniprot_id_from_pdb_id(pdb_id)
     id_chembl = get_chembl_id_from_uniprot_id(id_uniprot)
     return id_chembl
