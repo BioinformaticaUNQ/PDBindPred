@@ -14,12 +14,14 @@ def fetch_pdb_info(pdb_id):
     data = response.json()
     resolution = data.get("rcsb_entry_info", {}).get("resolution_combined", [None])[0]
     year = data.get("rcsb_accession_info", {}).get("initial_release_date", "")[:4]
+    doi = data.get("rcsb_primary_citation", {}).get("pdbx_database_id_doi")
 
     print(f"✅ Datos básicos obtenidos para PDB ID '{pdb_id}'")
     return {
         "pdb_id": pdb_id,
         "resolution": resolution,
         "publication_year": year,
+        "doi": doi,
         "ligands": [],
         "source": "RCSB PDB"
     }
