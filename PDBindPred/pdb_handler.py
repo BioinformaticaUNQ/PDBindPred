@@ -104,10 +104,44 @@ def process_pdb(pdb_id, affinity_types):
     package_dir = os.path.dirname(os.path.abspath(__file__))
     output_dir = os.path.join(package_dir, "output")
     os.makedirs(output_dir, exist_ok=True)
-    output_path = os.path.join(output_dir, f"output_{pdb_id}.json")
+    output_path = os.path.join(output_dir, f"pdb_{pdb_id}.json")
 
     with open(output_path, "w") as f:
         json.dump(result, f, indent=4)
 
     print(f"✅ Datos descargados para PDB ID {pdb_id}")
+    print(f"💾 Resultado guardado en {output_path}")
+
+def process_uniprot(uniprot_id, affinity_types):
+    result = {
+        "uniprot_id": uniprot_id,
+        "ligands": [],
+    }
+
+    try:
+        chembl_id = get_chembl_id_from_uniprot_id(uniprot_id)
+        result["chembl_id"] = chembl_id
+    except Exception as e:
+        print(f"⚠️  No se pudo obtener el ID ChEMBL: {e}")
+        result["chembl_id"] = None
+
+    ligands = []
+    if result["chembl_id"]:
+        try:
+            ligands = get_ligands_from_chembl_target(result["chembl_id"], affinity_types=affinity_types)
+        except Exception as e:
+            print(f"⚠️  Error al obtener ligandos desde ChEMBL: {e}")
+
+    result["ligands"] = ligands
+
+    # Guardar
+    package_dir = os.path.dirname(os.path.abspath(__file__))
+    output_dir = os.path.join(package_dir, "output")
+    os.makedirs(output_dir, exist_ok=True)
+    output_path = os.path.join(output_dir, f"uniprot_{uniprot_id}.json")
+
+    with open(output_path, "w") as f:
+        json.dump(result, f, indent=4)
+
+    print(f"✅ Datos descargados para UniProt ID {uniprot_id}")
     print(f"💾 Resultado guardado en {output_path}")
