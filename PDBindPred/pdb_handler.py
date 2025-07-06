@@ -2,7 +2,7 @@ import os
 import json
 import requests
 import xml.etree.ElementTree as ET
-from PDBindPred.get_ids import get_uniprot_id_from_pdb_id, get_chembl_id_from_uniprot_id
+from PDBindPred.get_ids_from_apis import get_uniprot_id_from_pdb_id, get_chembl_id_from_uniprot_id
 from PDBindPred import config
 
 def fetch_pdb_info(pdb_id):

@@ -1,6 +1,7 @@
 import argparse
-import os
 from argparse import RawTextHelpFormatter
+
+from PDBindPred.get_ids_from_input import get_pdb_ids_from_arguments, cargar_ids_desde_archivo
 from PDBindPred.pdb_handler import process_pdb, process_uniprot
 from PDBindPred import config
 import time
@@ -33,30 +34,6 @@ def create_parser():
     parser.add_argument("--aff", help="Tipos de afinidad a incluir, separados por coma (ej: Ki,Kd,IC50)")
     return parser
 
-"Extrae las PDB id introducidas en la consulta y devuelve una lista con las mismas."
-def get_pdb_ids_from_arguments(args):
-    pdb_ids = []
-    if args.pdb:
-        pdb_ids += [p.strip() for p in args.pdb.split(",") if p.strip()]
-    if args.pdb_file:
-        pdb_ids += cargar_ids_desde_archivo(args.pdb_file, "PDB")
-    pdb_ids = validar_pdb_ids(pdb_ids)
-    return pdb_ids
-
-def cargar_ids_desde_archivo(filepath, descripcion):
-    if not os.path.isfile(filepath):
-        raise FileNotFoundError(f"El archivo {filepath} no existe ({descripcion})")
-    with open(filepath, "r") as f:
-        return [line.strip() for line in f if line.strip()]
-
-def validar_pdb_ids(ids):
-    valid = []
-    for pdb_id in ids:
-        if len(pdb_id) == 4 and pdb_id.isalnum():
-            valid.append(pdb_id.upper())
-        else:
-            print(f"⚠️ ID PDB inválido: {pdb_id} (se ignorará)")
-    return list(set(valid))
 
 def validar_uniprot_ids(ids):
     valid = []
