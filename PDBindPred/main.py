@@ -9,6 +9,40 @@ class CustomArgumentParser(argparse.ArgumentParser):
     def _get_optionals_title(self):
         return 'Opciones'
 
+def create_parser():
+    parser = CustomArgumentParser(
+        description="PDBindPred - Anotación básica de estructuras PDB",
+        epilog="""
+    Ejemplos de uso:
+    python -m PDBindPred.main --pdb 1MQ8
+    python -m PDBindPred.main --pdb 1MQ8,2VDU --aff Ki,Kd
+    python -m PDBindPred.main --pdb-file ids_pdb.txt
+    python -m PDBindPred.main --uniprot P12345,Q8N163
+    python -m PDBindPred.main --uniprot-file ids_uniprot.txt
+    
+    El archivo ingresado debe tener una ID por línea, sin ningún otro 
+    separador, y debe encontrarse ubicado en la misma carpeta que el 
+    archivo main.py. Formatos testeados para los archivos: txt y csv.
+    """,
+        formatter_class=RawTextHelpFormatter
+    )
+    parser.add_argument("--pdb", help="Uno o más IDs PDB separados por coma (ej: 1MQ8,2VDU)")
+    parser.add_argument("--pdb-file", help="Archivo con una lista de IDs PDB, uno por línea")
+    parser.add_argument("--uniprot", help="Uno o más IDs UniProt separados por coma (ej: P12345,Q8N163)")
+    parser.add_argument("--uniprot-file", help="Archivo con una lista de IDs UniProt, uno por línea")
+    parser.add_argument("--aff", help="Tipos de afinidad a incluir, separados por coma (ej: Ki,Kd,IC50)")
+    return parser
+
+"Extrae las PDB id introducidas en la consulta y devuelve una lista con las mismas."
+def get_pdb_ids_from_arguments(args):
+    pdb_ids = []
+    if args.pdb:
+        pdb_ids += [p.strip() for p in args.pdb.split(",") if p.strip()]
+    if args.pdb_file:
+        pdb_ids += cargar_ids_desde_archivo(args.pdb_file, "PDB")
+    pdb_ids = validar_pdb_ids(pdb_ids)
+    return pdb_ids
+
 def cargar_ids_desde_archivo(filepath, descripcion):
     if not os.path.isfile(filepath):
         raise FileNotFoundError(f"El archivo {filepath} no existe ({descripcion})")
@@ -35,37 +69,14 @@ def validar_uniprot_ids(ids):
 
 def main():
     print("\n🚀 Inicio de ejecución de PDBindPred\n")
-    parser = CustomArgumentParser(
-        description="PDBindPred - Anotación básica de estructuras PDB",
-        epilog="""
-    Ejemplos de uso:
-    python -m PDBindPred.main --pdb 1MQ8
-    python -m PDBindPred.main --pdb 1MQ8,2VDU --aff Ki,Kd
-    python -m PDBindPred.main --pdb-file ids_pdb.txt
-    python -m PDBindPred.main --uniprot P12345,Q8N163
-    python -m PDBindPred.main --uniprot-file ids_uniprot.txt
-    """,
-        formatter_class=RawTextHelpFormatter
-    )
-
-    parser.add_argument("--pdb", help="Uno o más IDs PDB separados por coma (ej: 1MQ8,2VDU)")
-    parser.add_argument("--pdb-file", help="Archivo con una lista de IDs PDB, uno por línea")
-    parser.add_argument("--uniprot", help="Uno o más IDs UniProt separados por coma (ej: P12345,Q8N163)")
-    parser.add_argument("--uniprot-file", help="Archivo con una lista de IDs UniProt, uno por línea")
-    parser.add_argument("--aff", help="Tipos de afinidad a incluir, separados por coma (ej: Ki,Kd,IC50)")
+    parser = create_parser()
     args = parser.parse_args()
 
     if not any([args.pdb, args.pdb_file, args.uniprot, args.uniprot_file]):
         parser.error("Debe proporcionar al menos uno de: --pdb, --pdb-file, --uniprot o --uniprot-file")
 
     # Leer IDs PDB
-    pdb_ids = []
-    if args.pdb:
-        pdb_ids += [p.strip() for p in args.pdb.split(",") if p.strip()]
-    if args.pdb_file:
-        pdb_ids += cargar_ids_desde_archivo(args.pdb_file, "PDB")
-
-    pdb_ids = validar_pdb_ids(pdb_ids)
+    pdb_ids = get_pdb_ids_from_arguments(args)
 
     # Leer IDs UniProt
     uniprot_ids = []
@@ -108,6 +119,8 @@ def main():
                 print(f"❌ Error procesando UniProt {uniprot_id}: {e}")
     
     print("\n🏁 Ejecución completada\n")
+
+
 
 if __name__ == "__main__":
     try:

@@ -31,10 +31,12 @@ PDBindPred - Anotación básica de estructuras PDB
 
 Opciones:
   --pdb        Uno o más IDs PDB separados por coma (ej: 1MQ8,2VDU)
-  --pdb-file   Archivo con una lista de IDs PDB, uno por línea
+  --pdb-file   Archivo con una lista de IDs PDB. El archivo ingresado debe tener una ID por línea, sin ningún otro separador, y debe encontrarse ubicado en la misma carpeta que el archivo main.py. Formatos testeados para los archivos: txt y csv.
   --aff        Tipos de afinidad a incluir, separados por coma (ej: Ki,Kd,IC50)
 
+
 Ejemplos de uso:
+  python -m PDBindPred.main --uniprot P05067
   python -m PDBindPred.main --pdb 1MQ8
   python -m PDBindPred.main --pdb 1MQ8,2VDU --aff Ki,Kd
   python -m PDBindPred.main --pdb-file ids.txt
