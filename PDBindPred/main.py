@@ -9,9 +9,16 @@ import time
 class CustomArgumentParser(argparse.ArgumentParser):
     def _get_optionals_title(self):
         return 'Opciones'
+    def error(self, message):
+        raise Exception("Los argumentos posibles son: --pdb, "
+                        "--pdb-file, --uniprot, --uniprot-file, --aff. Para más "
+                        "información revise el archivo README o consulte "
+                        "la ayuda de este programa escribiendo: python -m "
+                        "PDBindPred.main --help")
 
 def create_parser():
     parser = CustomArgumentParser(
+        exit_on_error=False,
         description="PDBindPred - Anotación básica de estructuras PDB",
         epilog="""
     Ejemplos de uso:
@@ -39,10 +46,8 @@ def create_parser():
 def main():
     print("\n🚀 Inicio de ejecución de PDBindPred\n")
     parser = create_parser()
-    args = parser.parse_args()
 
-    if not any([args.pdb, args.pdb_file, args.uniprot, args.uniprot_file]):
-        parser.error("Debe proporcionar al menos uno de: --pdb, --pdb-file, --uniprot o --uniprot-file")
+    args = validate_input(parser)
 
     # Leer IDs PDB
     pdb_ids = get_pdb_ids_from_arguments(args)
@@ -84,7 +89,11 @@ def main():
     print("\n🏁 Ejecución completada\n")
 
 
-
+def validate_input(parser):
+    args = parser.parse_args()
+    if not any([args.pdb, args.pdb_file, args.uniprot, args.uniprot_file]):
+        parser.error()
+    return args
 
 if __name__ == "__main__":
     try:

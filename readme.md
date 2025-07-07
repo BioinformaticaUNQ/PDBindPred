@@ -37,7 +37,7 @@ Opciones:
 
 Ejemplos de uso:
   python -m PDBindPred.main --uniprot P05067
-  python -m PDBindPred.main --pdb 1MQ7
+  python -m PDBindPred.main --pdb 1MQ8
   python -m PDBindPred.main --pdb 1MQ8,2VDU --aff Ki,Kd
   python -m PDBindPred.main --pdb-file ids.txt
 ```
