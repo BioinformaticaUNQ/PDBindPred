@@ -1,7 +1,7 @@
 import argparse
 from argparse import RawTextHelpFormatter
 
-from PDBindPred.get_ids_from_input import get_pdb_ids_from_arguments, cargar_ids_desde_archivo
+from PDBindPred.get_ids_from_input import get_pdb_ids_from_arguments, get_uniprot_ids_from_arguments
 from PDBindPred.pdb_handler import process_pdb, process_uniprot
 from PDBindPred import config
 import time
@@ -35,14 +35,6 @@ def create_parser():
     return parser
 
 
-def validar_uniprot_ids(ids):
-    valid = []
-    for uniprot_id in ids:
-        if (6 <= len(uniprot_id) <= 10) and all(c.isalnum() for c in uniprot_id):
-            valid.append(uniprot_id.upper())
-        else:
-            print(f"⚠️ ID UniProt inválido: {uniprot_id} (se ignorará)")
-    return list(set(valid))
 
 def main():
     print("\n🚀 Inicio de ejecución de PDBindPred\n")
@@ -56,13 +48,7 @@ def main():
     pdb_ids = get_pdb_ids_from_arguments(args)
 
     # Leer IDs UniProt
-    uniprot_ids = []
-    if args.uniprot:
-        uniprot_ids += [u.strip() for u in args.uniprot.split(",") if u.strip()]
-    if args.uniprot_file:
-        uniprot_ids += cargar_ids_desde_archivo(args.uniprot_file, "UniProt")
-
-    uniprot_ids = validar_uniprot_ids(uniprot_ids)
+    uniprot_ids = get_uniprot_ids_from_arguments(args)
 
     affinity_types = args.aff.split(",") if args.aff else None
 
@@ -96,6 +82,7 @@ def main():
                 print(f"❌ Error procesando UniProt {uniprot_id}: {e}")
     
     print("\n🏁 Ejecución completada\n")
+
 
 
 

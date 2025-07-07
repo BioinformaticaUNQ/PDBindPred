@@ -12,6 +12,15 @@ def get_pdb_ids_from_arguments(args):
     return pdb_ids
 
 
+def get_uniprot_ids_from_arguments(args):
+    uniprot_ids = []
+    if args.uniprot:
+        uniprot_ids += [u.strip() for u in args.uniprot.split(",") if u.strip()]
+    if args.uniprot_file:
+        uniprot_ids += cargar_ids_desde_archivo(args.uniprot_file, "UniProt")
+    uniprot_ids = validar_uniprot_ids(uniprot_ids)
+    return uniprot_ids
+
 def cargar_ids_desde_archivo(filepath, descripcion):
     if not os.path.isfile(filepath):
         raise FileNotFoundError(f"El archivo {filepath} no existe ({descripcion})")
@@ -26,4 +35,14 @@ def validar_pdb_ids(ids):
             valid.append(pdb_id.upper())
         else:
             print(f"⚠️ ID PDB inválido: {pdb_id} (se ignorará)")
+    return list(set(valid))
+
+
+def validar_uniprot_ids(ids):
+    valid = []
+    for uniprot_id in ids:
+        if (6 <= len(uniprot_id) <= 10) and all(c.isalnum() for c in uniprot_id):
+            valid.append(uniprot_id.upper())
+        else:
+            print(f"⚠️ ID UniProt inválido: {uniprot_id} (se ignorará)")
     return list(set(valid))
