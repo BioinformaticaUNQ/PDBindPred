@@ -117,13 +117,13 @@ def process_pdb(pdb_id, affinity_types):
             print(f"⚠️ Error al obtener ligandos desde ChEMBL: {e}")
 
     result["ligands"] = ligands
-
+    """
     # Guardar salida
     package_dir = os.path.dirname(os.path.abspath(__file__))
     output_dir = os.path.join(package_dir, "output")
     os.makedirs(output_dir, exist_ok=True)
     output_path = os.path.join(output_dir, f"pdb_{pdb_id}.json")
-
+    """
     with open(output_path, "w") as f:
         json.dump(result, f, indent=4)
 
@@ -161,13 +161,13 @@ def process_uniprot(uniprot_id, affinity_types):
             print(f"⚠️ Error al obtener ligandos desde ChEMBL: {e}")
 
     result["ligands"] = ligands
-
+    """
     # Guardar salida
     package_dir = os.path.dirname(os.path.abspath(__file__))
     output_dir = os.path.join(package_dir, "output")
     os.makedirs(output_dir, exist_ok=True)
     output_path = os.path.join(output_dir, f"uniprot_{uniprot_id}.json")
-
+    """
     with open(output_path, "w") as f:
         json.dump(result, f, indent=4)
 
