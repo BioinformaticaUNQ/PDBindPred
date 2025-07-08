@@ -66,22 +66,19 @@ def get_ligands_from_chembl_target(chembl_target_id: str, affinity_types=None):
             continue
 
         # Buscamos el ligando
+        ligand_assay_data = {"assay id": assay_id, "publication_year": year}
         ligand = next((lig for lig in ligands if lig["chembl_id"] == ligand_id), None)
         if ligand is None:
-            ligand = {"chembl_id": ligand_id,"canonical_smiles": canonical_smiles, "assays": []}
+            ligand = {"chembl_id": ligand_id,"canonical_smiles": canonical_smiles, "assays": [ligand_assay_data]}
             ligands.append(ligand)
-
-        # Buscamos el assay dentro del ligando
-        assay = next((assay for assay in ligand["assays"] if assay["assay id"] == assay_id), None)
-        if assay is None:
-            assay = {"assay id": assay_id, "publication_year": year}
-            ligand["assays"].append(assay)
+        else:
+            ligand["assays"].append(ligand_assay_data)
 
         # Agregamos el tipo como propiedad dinámica
         try:
-            assay[type_] = float(value)
+            ligand_assay_data[type_] = float(value)
         except ValueError:
-            assay[type_] = value  # por si no es numérico
+            ligand_assay_data[type_] = value  # por si no es numérico
 
     print(f"✅ Ligandos procesados para ChEMBL ID '{chembl_target_id}': {len(ligands)} encontrados")
     return ligands
