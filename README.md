@@ -1,9 +1,13 @@
 # 🧬 PDBindPred
 
-Herramienta de anotación básica de estructuras PDB. Permite obtener datos estructurales y de afinidad molecular desde **RCSB PDB**, **UniProt** y **ChEMBL**.
+Herramienta de anotación básica de estructuras PDB. Permite 
+obtener datos estructurales y de afinidad molecular desde 
+**RCSB PDB**, **UniProt** y **ChEMBL**.
 
 ## 📋 Descripción
-Este script permite consultar información de proteínas y sus ligandos desde diversas bases de datos públicas, a partir de IDs de **PDB** o **UniProt**. Los datos obtenidos incluyen:
+Este script permite consultar información de proteínas y sus 
+ligandos desde ChEMBL, a partir de IDs de **PDB** o **UniProt**. 
+Los datos obtenidos incluyen:
 
 - Resolución de la estructura
 - Año de publicación
@@ -76,6 +80,27 @@ Archivos de salida:
 
 ### ✅ Notas sobre el Campo DOI
 - El campo **DOI** solo se incluye cuando la información está disponible en la base RCSB PDB.
+
+### Algunas decisiones tomadas para el desarrollo de esta aplicación
+- Este trabajo se inició estudiando tres bases de datos: 
+[ChEMBL](https://www.ebi.ac.uk/chembl/), 
+[PDBbind](https://www.pdbbind-plus.org.cn/) 
+(que ofrece datos de manera gratuita sólo del año 2020 para atrás) y 
+[BindingDB](https://www.bindingdb.org/rwd/bind/index.jsp). 
+Sin embargo, debido a las diferencias en las estructuras 
+de dichas bases de datos, la consulta a las tres bases en simultáneo y 
+la posterior unificación de sus resultados resultó imposible. Se 
+decidió por tanto restringir la aplicación a una sola base de datos,
+ChEMBL, para priorizar que los datos obtenidos no generen ambigüedades 
+para quienes los usen.
+- ChEMBL permite consultas en su base de datos a través de sus propios 
+identificadores, por lo que las IDs de PDB o UniProt ingresadas en las 
+consultas a este programa deben ser traducidas a IDs de ChEMBL. Para 
+dicha tarea de decidió utilizar por su velocidad y practicidad la API 
+[IDMapping de UniProt](https://www.uniprot.org/id-mapping). En el 
+caso de las IDs de PDB, se hacen dos 
+consultas: primero se traduce la ID de PDB a ID Uniprot, y luego de 
+Uniprot a ID ChEMBL.
 
 ## 🔗 Referencias Útiles
 
