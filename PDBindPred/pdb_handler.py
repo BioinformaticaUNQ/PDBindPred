@@ -50,12 +50,14 @@ def get_ligands_from_chembl_target(chembl_target_id: str, affinity_types=None):
         type_elem = activity.find("standard_type")
         year_elem = activity.find("document_year")
         assay_chembl_id_elem = activity.find("assay_chembl_id")
+        canonical_smiles_elem = activity.find("canonical_smiles")
 
         ligand_id = chembl_id_elem.text if chembl_id_elem is not None else None
         value = value_elem.text if value_elem is not None else None
         type_ = type_elem.text if type_elem is not None else None
         year = year_elem.text if year_elem is not None else None
         assay_id = assay_chembl_id_elem.text if assay_chembl_id_elem is not None else None
+        canonical_smiles = canonical_smiles_elem.text if canonical_smiles_elem is not None else None
 
         if not ligand_id or not assay_id or not type_ or not value:
             continue  # ignoramos datos incompletos
@@ -66,7 +68,7 @@ def get_ligands_from_chembl_target(chembl_target_id: str, affinity_types=None):
         # Buscamos el ligando
         ligand = next((lig for lig in ligands if lig["chembl_id"] == ligand_id), None)
         if ligand is None:
-            ligand = {"chembl_id": ligand_id, "assays": []}
+            ligand = {"chembl_id": ligand_id,"canonical_smiles": canonical_smiles, "assays": []}
             ligands.append(ligand)
 
         # Buscamos el assay dentro del ligando
