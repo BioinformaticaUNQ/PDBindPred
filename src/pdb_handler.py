@@ -23,8 +23,10 @@ def fetch_pdb_info(pdb_id):
         "resolution": resolution,
         "publication_year": year,
         "doi": doi,
-        "ligands": [],
-        "source": "RCSB PDB"
+        "uniprot_id": None,
+        "chembl_id": None,
+        "sources": "RCSB PDB, ChEMBL, UniProt",
+        "ligands": []
     }
 
 def get_ligands_from_chembl_target(chembl_target_id: str, affinity_types=None):
@@ -105,8 +107,6 @@ def process_pdb(pdb_id, affinity_types):
         result["chembl_id"] = chembl_id
     except Exception as e:
         print(f"⚠️ No se pudieron obtener los IDs UniProt/ChEMBL: {e}")
-        result["uniprot_id"] = None
-        result["chembl_id"] = None
 
     ligands = []
     if result.get("chembl_id"):
@@ -142,7 +142,9 @@ def process_uniprot(uniprot_id, affinity_types):
     print(f"🔗 Procesando UniProt ID '{uniprot_id}'...")
     result = {
         "uniprot_id": uniprot_id,
-        "ligands": [],
+        "chembl_id": None,
+        "sources": "ChEMBL, UniProt",
+        "ligands": []
     }
 
     try:
@@ -150,7 +152,6 @@ def process_uniprot(uniprot_id, affinity_types):
         result["chembl_id"] = chembl_id
     except Exception as e:
         print(f"⚠️ No se pudo obtener el ID ChEMBL: {e}")
-        result["chembl_id"] = None
 
     ligands = []
     if result.get("chembl_id"):
