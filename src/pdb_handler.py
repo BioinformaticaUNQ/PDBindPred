@@ -30,23 +30,28 @@ def fetch_pdb_info(pdb_id):
     }
 
 def get_ligands_from_chembl_target(chembl_target_id: str, affinity_types=None):
-    url = f"https://www.ebi.ac.uk/chembl/api/data/activity?target_chembl_id={chembl_target_id}&assay_type__exact=B"
+    url = "https://www.ebi.ac.uk"
+    query = f'/chembl/api/data/activity?target_chembl_id={chembl_target_id}&assay_type__exact=B'
     headers = {"Accept": "application/xml"}
     print(f"📡 Enviando consulta a ChEMBL para obtener ligandos asociados a ChEMBL ID '{chembl_target_id}'...")
-    response = requests.get(url, headers=headers, timeout=10)
 
-    if response.status_code != 200:
-        print(f"⚠️ No se pudo obtener datos desde ChEMBL para {chembl_target_id}")
-        return []
-
-    try:
-        root = ET.fromstring(response.text)
-    except ET.ParseError as e:
-        print(f"⚠️ Error al parsear XML de respuesta ChEMBL: {e}")
-        return []
+    activities = []
+    while query != None:
+        url_query = url + query
+        response = requests.get(url_query, headers=headers, timeout=10)
+        if response.status_code != 200:
+            print(f"⚠️ No se pudo obtener datos desde ChEMBL para {chembl_target_id}")
+            return []
+        try:
+            root = ET.fromstring(response.text)
+        except ET.ParseError as e:
+            print(f"⚠️ Error al parsear XML de respuesta ChEMBL: {e}")
+            return []
+        activities += root.findall(".//activity")
+        query = root.find('.//next').text
 
     ligands = []
-    for activity in root.findall(".//activity"):
+    for activity in activities:
         chembl_id_elem = activity.find("molecule_chembl_id")
         value_elem = activity.find("standard_value")
         type_elem = activity.find("standard_type")
