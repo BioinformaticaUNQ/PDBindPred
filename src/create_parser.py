@@ -10,20 +10,20 @@ class CustomArgumentParser(argparse.ArgumentParser):
                         "--pdb-file, --uniprot, --uniprot-file, --aff. Para más "
                         "información revise el archivo README o consulte "
                         "la ayuda de este programa escribiendo: python -m "
-                        "PDBindPred.main --help")
+                        "src.main --help")
 
 
 def create_parser():
     parser = CustomArgumentParser(
         exit_on_error=False,
-        description="PDBindPred - Anotación básica de estructuras PDB",
+        description="src - Anotación básica de estructuras PDB",
         epilog="""
     Ejemplos de uso:
-    python -m PDBindPred.main --pdb 1MQ8
-    python -m PDBindPred.main --pdb 1MQ8,2VDU --aff Ki,Kd
-    python -m PDBindPred.main --pdb-file ids_pdb.txt
-    python -m PDBindPred.main --uniprot P12345,Q8N163
-    python -m PDBindPred.main --uniprot-file ids_uniprot.txt
+    python -m src.main --pdb 1MQ8
+    python -m src.main --pdb 1MQ8,2VDU --aff Ki,Kd
+    python -m src.main --pdb-file ids_pdb.txt
+    python -m src.main --uniprot P12345,Q8N163
+    python -m src.main --uniprot-file ids_uniprot.txt
     
     El archivo ingresado debe tener una ID por línea, sin ningún otro 
     separador, y debe encontrarse ubicado en la misma carpeta que el 

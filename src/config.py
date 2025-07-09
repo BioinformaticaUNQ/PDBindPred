@@ -1,4 +1,4 @@
-# PDBindPred/config.py
+# src/config.py
 
 # Límite de IDs permitidos por consulta
 MAX_UNIPROT_IDS_PER_QUERY = 1000  # Límite de UniProt (documentado)

@@ -1,12 +1,12 @@
-from PDBindPred.create_parser import create_parser
-from PDBindPred.get_ids_from_input import get_pdb_ids_from_arguments, get_uniprot_ids_from_arguments
-from PDBindPred.pdb_handler import process_pdb, process_uniprot
-from PDBindPred import config
+from src.create_parser import create_parser
+from src.get_ids_from_input import get_pdb_ids_from_arguments, get_uniprot_ids_from_arguments
+from src.pdb_handler import process_pdb, process_uniprot
+from src import config
 import time
 
 
 def main():
-    print("\n🚀 Inicio de ejecución de PDBindPred\n")
+    print("\n🚀 Inicio de ejecución de src\n")
     parser = create_parser()
 
     args = validate_input(parser)

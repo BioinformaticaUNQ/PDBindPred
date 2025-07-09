@@ -1,6 +1,6 @@
-import PDBindPred.create_parser
-from PDBindPred.get_ids_from_input import cargar_ids_desde_archivo, validar_pdb_ids, validar_uniprot_ids
-import PDBindPred.main
+import src.create_parser
+from src.get_ids_from_input import cargar_ids_desde_archivo, validar_pdb_ids, validar_uniprot_ids
+import src.main
 import unittest
 
 class TestsGetIdsFromInput(unittest.TestCase):
@@ -47,24 +47,24 @@ class TestsGetIdsFromInput(unittest.TestCase):
         self.assertIn('P15529', validated_uniprot_ids)
 
     def test_get_individual_pdb_id_from_arguments_successfully(self):
-        parser = PDBindPred.create_parser.create_parser()
+        parser = src.create_parser.create_parser()
         args = parser.parse_args(['--pdb', '1MQ8'])
-        pdb_ids = PDBindPred.get_ids_from_input.get_pdb_ids_from_arguments(args)
+        pdb_ids = src.get_ids_from_input.get_pdb_ids_from_arguments(args)
         self.assertEqual(1, len(pdb_ids))
         self.assertIn('1MQ8', pdb_ids)
 
     def test_get_multiple_pdb_ids_from_arguments_succesfully(self):
-        parser = PDBindPred.create_parser.create_parser()
+        parser = src.create_parser.create_parser()
         args = parser.parse_args(['--pdb', '1MQ8, 7gch'])
-        pdb_ids = PDBindPred.get_ids_from_input.get_pdb_ids_from_arguments(args)
+        pdb_ids = src.get_ids_from_input.get_pdb_ids_from_arguments(args)
         self.assertEqual(2, len(pdb_ids))
         self.assertIn('1MQ8', pdb_ids)
         self.assertIn('7GCH', pdb_ids)
 
     def test_get_multiple_pdb_ids_from_file_and_arguments_successfully(self):
-        parser = PDBindPred.create_parser.create_parser()
+        parser = src.create_parser.create_parser()
         args = parser.parse_args(['--pdb', '1MQ8, 7gch', '--pdb-file', 'test_pdb_ids.txt'])
-        pdb_ids = PDBindPred.get_ids_from_input.get_pdb_ids_from_arguments(args)
+        pdb_ids = src.get_ids_from_input.get_pdb_ids_from_arguments(args)
         self.assertEqual(4, len(pdb_ids))
         self.assertIn('1MQ8', pdb_ids)
         self.assertIn('7GCH', pdb_ids)
@@ -72,24 +72,24 @@ class TestsGetIdsFromInput(unittest.TestCase):
         self.assertIn('3AT1', pdb_ids)
 
     def test_get_individual_uniprot_id_from_arguments_successfully(self):
-        parser = PDBindPred.create_parser.create_parser()
+        parser = src.create_parser.create_parser()
         args = parser.parse_args(['--uniprot', 'A0A010RRV2'])
-        uniprot_ids = PDBindPred.get_ids_from_input.get_uniprot_ids_from_arguments(args)
+        uniprot_ids = src.get_ids_from_input.get_uniprot_ids_from_arguments(args)
         self.assertEqual(1, len(uniprot_ids))
         self.assertIn('A0A010RRV2', uniprot_ids)
 
     def test_get_multiple_uniprot_ids_from_arguments_succesfully(self):
-        parser = PDBindPred.create_parser.create_parser()
+        parser = src.create_parser.create_parser()
         args = parser.parse_args(['--uniprot', 'A0A010RRV2, Q9Y2H6'])
-        uniprot_ids = PDBindPred.get_ids_from_input.get_uniprot_ids_from_arguments(args)
+        uniprot_ids = src.get_ids_from_input.get_uniprot_ids_from_arguments(args)
         self.assertEqual(2, len(uniprot_ids))
         self.assertIn('A0A010RRV2', uniprot_ids)
         self.assertIn('Q9Y2H6', uniprot_ids)
 
     def test_get_multiple_uniprot_ids_from_file_and_arguments_successfully(self):
-        parser = PDBindPred.create_parser.create_parser()
+        parser = src.create_parser.create_parser()
         args = parser.parse_args(['--uniprot', 'A0A010RRV2, Q9Y2H6', '--uniprot-file', 'test_uniprot_ids.txt'])
-        uniprot_ids = PDBindPred.get_ids_from_input.get_uniprot_ids_from_arguments(args)
+        uniprot_ids = src.get_ids_from_input.get_uniprot_ids_from_arguments(args)
         self.assertEqual(5, len(uniprot_ids))
         self.assertIn('A0A010RRV2', uniprot_ids)
         self.assertIn('Q9Y2H6', uniprot_ids)

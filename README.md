@@ -27,31 +27,31 @@ pip install requests
 
 ### 🔹 Consulta simple por PDB ID
 ```bash
-python -m PDBindPred.main --pdb 1MQ8
+python -m src.main --pdb 1MQ8
 ```
 Consulta datos estructurales y ligandos para el PDB ID `1MQ8`.
 
 ### 🔹 Consulta múltiple por PDB IDs con afinidades filtradas
 ```bash
-python -m PDBindPred.main --pdb 1MQ8,2VDU --aff Ki,Kd
+python -m src.main --pdb 1MQ8,2VDU --aff Ki,Kd
 ```
 Consulta múltiples PDB IDs, incluyendo solo afinidades tipo **Ki** y **Kd**.
 
 ### 🔹 Consulta desde archivo de IDs PDB
 ```bash
-python -m PDBindPred.main --pdb-file ids_pdb.txt
+python -m src.main --pdb-file ids_pdb.txt
 ```
 Lee IDs de un archivo de texto y realiza las consultas correspondientes.
 
 ### 🔹 Consulta por UniProt ID
 ```bash
-python -m PDBindPred.main --uniprot P12345
+python -m src.main --uniprot P12345
 ```
 Consulta ligandos y afinidades para el UniProt ID `P12345`.
 
 ### 🔹 Consulta desde archivo de IDs UniProt
 ```bash
-python -m PDBindPred.main --uniprot-file ids_uniprot.txt
+python -m src.main --uniprot-file ids_uniprot.txt
 ```
 Lee UniProt IDs desde un archivo de texto y procesa cada uno.
 

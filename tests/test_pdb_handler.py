@@ -1,6 +1,6 @@
 import unittest
 
-from PDBindPred.pdb_handler import fetch_pdb_info
+from src.pdb_handler import fetch_pdb_info
 
 
 class TestsPdbHandler(unittest.TestCase):
