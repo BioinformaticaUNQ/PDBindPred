@@ -1,5 +1,7 @@
 import os
 import json
+from xml.etree.ElementTree import Element
+
 import requests
 import xml.etree.ElementTree as ET
 from src.get_ids_from_apis import get_uniprot_id_from_pdb_id, get_chembl_id_from_uniprot_id
@@ -11,7 +13,7 @@ def fetch_pdb_info(pdb_id):
     response = requests.get(url, timeout=10)
     if response.status_code != 200:
         raise ValueError(f"❌ Error al obtener datos para PDB ID '{pdb_id}': código {response.status_code}")
-    
+
     data = response.json()
     resolution = data.get("rcsb_entry_info", {}).get("resolution_combined", [None])[0]
     year = data.get("rcsb_accession_info", {}).get("initial_release_date", "")[:4]
@@ -29,14 +31,14 @@ def fetch_pdb_info(pdb_id):
         "ligands": []
     }
 
-def get_ligands_from_chembl_target(chembl_target_id: str, affinity_types=None):
+def get_binding_activities_for_target_from_chembl(chembl_target_id: str, affinity_types=None):
     url = "https://www.ebi.ac.uk"
     query = f'/chembl/api/data/activity?target_chembl_id={chembl_target_id}&assay_type__exact=B'
     headers = {"Accept": "application/xml"}
     print(f"📡 Enviando consulta a ChEMBL para obtener ligandos asociados a ChEMBL ID '{chembl_target_id}'...")
 
     activities = []
-    while query != None:
+    while query is not None:
         url_query = url + query
         response = requests.get(url_query, headers=headers, timeout=10)
         if response.status_code != 200:
@@ -49,22 +51,18 @@ def get_ligands_from_chembl_target(chembl_target_id: str, affinity_types=None):
             return []
         activities += root.findall(".//activity")
         query = root.find('.//next').text
+    return activities
 
+def get_ligands_from_chembl_target(chembl_target_id: str, affinity_types=None):
+    activities = get_binding_activities_for_target_from_chembl(chembl_target_id, affinity_types)
     ligands = []
     for activity in activities:
-        chembl_id_elem = activity.find("molecule_chembl_id")
-        value_elem = activity.find("standard_value")
-        type_elem = activity.find("standard_type")
-        year_elem = activity.find("document_year")
-        assay_chembl_id_elem = activity.find("assay_chembl_id")
-        canonical_smiles_elem = activity.find("canonical_smiles")
-
-        ligand_id = chembl_id_elem.text if chembl_id_elem is not None else None
-        value = value_elem.text if value_elem is not None else None
-        type_ = type_elem.text if type_elem is not None else None
-        year = year_elem.text if year_elem is not None else None
-        assay_id = assay_chembl_id_elem.text if assay_chembl_id_elem is not None else None
-        canonical_smiles = canonical_smiles_elem.text if canonical_smiles_elem is not None else None
+        ligand_id = get_ligand_id_from_activity(activity)
+        canonical_smiles = get_canonical_smiles_from_activity(activity)
+        value = get_affinity_value_from_activity(activity)
+        type_ = get_affinity_value_type_from_activity(activity)
+        year = get_document_year_from_activity(activity)
+        assay_id = get_assay_id_from_activity(activity)
 
         if not ligand_id or not assay_id or not type_ or not value:
             continue  # ignoramos datos incompletos
@@ -72,8 +70,9 @@ def get_ligands_from_chembl_target(chembl_target_id: str, affinity_types=None):
         if affinity_types and type_ not in affinity_types:
             continue
 
+        ligand_assay_data = get_ligand_assay_data(assay_id, type_, value, year)
+
         # Buscamos el ligando
-        ligand_assay_data = {"assay id": assay_id, "publication_year": year}
         ligand = next((lig for lig in ligands if lig["chembl_id"] == ligand_id), None)
         if ligand is None:
             ligand = {"chembl_id": ligand_id,"canonical_smiles": canonical_smiles, "assays": [ligand_assay_data]}
@@ -81,18 +80,51 @@ def get_ligands_from_chembl_target(chembl_target_id: str, affinity_types=None):
         else:
             ligand["assays"].append(ligand_assay_data)
 
-        # Agregamos el tipo como propiedad dinámica
-        try:
-            ligand_assay_data[type_] = float(value)
-        except ValueError:
-            ligand_assay_data[type_] = value  # por si no es numérico
-
     print(f"✅ Ligandos procesados para ChEMBL ID '{chembl_target_id}': {len(ligands)} encontrados")
     return ligands
 
 
-def process_pdb(pdb_id, affinity_types):
+def get_ligand_assay_data(assay_id, type_, value, year):
+    ligand_assay_data = {"assay id": assay_id, "publication_year": year}
+    # Agregamos el tipo como propiedad dinámica
+    try:
+        ligand_assay_data[type_] = float(value)
+    except ValueError:
+        ligand_assay_data[type_] = value  # por si no es numérico
+    return ligand_assay_data
 
+
+def get_ligand_id_from_activity(activity: Element):
+    chembl_id_elem = activity.find("molecule_chembl_id")
+    ligand_id = chembl_id_elem.text if chembl_id_elem is not None else None
+    return ligand_id
+
+def get_canonical_smiles_from_activity(activity: Element):
+    canonical_smiles_elem = activity.find("canonical_smiles")
+    canonical_smiles = canonical_smiles_elem.text if canonical_smiles_elem is not None else None
+    return canonical_smiles
+
+def get_affinity_value_from_activity(activity: Element):
+    value_elem = activity.find("standard_value")
+    value = value_elem.text if value_elem is not None else None
+    return value
+
+def get_affinity_value_type_from_activity(activity: Element):
+    type_elem = activity.find("standard_type")
+    type_ = type_elem.text if type_elem is not None else None
+    return type_
+
+def get_document_year_from_activity(activity: Element):
+    year_elem = activity.find("document_year")
+    year = year_elem.text if year_elem is not None else None
+    return (year)
+
+def get_assay_id_from_activity(activity: Element):
+    assay_chembl_id_elem = activity.find("assay_chembl_id")
+    assay_id = assay_chembl_id_elem.text if assay_chembl_id_elem is not None else None
+    return assay_id
+
+def process_pdb(pdb_id, affinity_types):
     package_dir = os.path.dirname(os.path.abspath(__file__))
     output_dir = os.path.join(package_dir, "output")
     os.makedirs(output_dir, exist_ok=True)
