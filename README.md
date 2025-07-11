@@ -16,13 +16,12 @@ Los datos obtenidos incluyen:
 
 ## ⚙️ Requisitos Previos
 
-- **Python 3.11.4** (u otra versión compatible)
+- Tener instalado [**Python 3.11.4**](https://www.python.org/downloads/release/python-3114/) (u otra versión compatible).
 - Instalar dependencias necesarias:
 
 ```bash
-pip install requests
+pip install -r requirements.txt
 ```
-
 ## 🚀 Ejemplos de Uso
 
 ### 🔹 Consulta simple por PDB ID
@@ -61,6 +60,13 @@ Lee UniProt IDs desde un archivo de texto y procesa cada uno.
 
 Los parámetros pueden combinarse. Por ejemplo, es posible consultar IDs de PDB y UniProt en la misma ejecución.
 
+## 🧪 Tests
+
+Para correr los tests del proyecto, utilizá el siguiente comando desde la raíz del repositorio:
+
+```bash
+python -m unittest discover -s tests
+```
 ## 🗃️ Detalles Adicionales
 
 ### ✅ Caché Local (Opcional)
