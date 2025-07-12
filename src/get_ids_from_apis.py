@@ -1,5 +1,6 @@
 import sys
 import requests
+import json
 
 """
 Recibe una id PDB como string. Realiza un request para mapear la id 
@@ -18,21 +19,18 @@ def get_uniprot_id_from_pdb_id(pdb_id: str):
     print(f"✅ UniProt ID obtenido para PDB ID '{pdb_id}': {id_uniprot}")
     return id_uniprot
 
+
 """
 Recibe una id UniProt como string. Realiza un request para mapear la id 
 en ChEMBL y devuelve la id ChEMBL como string para el mismo elemento.
 """
 def get_chembl_id_from_uniprot_id(uniprot_id: str):
-    params_uniprot_to_chembl = {
-        "from": "UniProtKB_AC-ID",
-        "to": "ChEMBL",
-        "ids": uniprot_id
-    }
-    result = post_request_in_uniprot_idmapping(params_uniprot_to_chembl)
-    data = get_result_from_uniprot_idmapping_job(result)
-    id_chembl = data.get("results")[0].get("to")
-
-    print(f"✅ ChEMBL ID obtenido para UniProt ID '{uniprot_id}': {id_chembl}")
+    url = f"https://rest.uniprot.org/uniprotkb/{uniprot_id}?fields=xref_pdb%2Cxref_chembl"
+    response = requests.get(url, timeout=10)
+    data = response.json()
+    ids_data = data.get('uniProtKBCrossReferences')
+    chembl_ids_data = next((id for id in ids_data if id['database'] == "ChEMBL"), None)
+    id_chembl = chembl_ids_data.get('id')
     return id_chembl
 
 """
