@@ -42,6 +42,13 @@ python -m src.main --pdb-file ids_pdb.txt
 ```
 Lee IDs de un archivo de texto y realiza las consultas correspondientes.
 
+### 🔹 Consulta por PDB ID en relacion a determinados ligandos
+```bash
+python -m src.main --pdb 1MQ8 --lig CHEMBL258114,CHEMBL117198
+```
+Consulta datos estructurales para el PDB ID `1MQ8` y, si posee, 
+su afinidad con los ligandos CHEMBL258114 y CHEMBL117198.
+
 ### 🔹 Consulta por UniProt ID
 ```bash
 python -m src.main --uniprot P05067 --aff Ki
@@ -111,6 +118,11 @@ usando la [API regular de Uniprot](https://www.uniprot.org/api-documentation/uni
 ya que de esta manera se obtienen también (para aquellas consultas 
 hechas directamente con ID de Uniprot) sus IDs de PDB y la resolución 
 de la proteína para cada una de ellas. 
+- Al momento de hacer esta aplicación, no encontramos una base que una 
+los IDs de ligandos en ChEMBL a otras de las bases aquí utilizadas como 
+UniProt o PDB; al correr muchas de las IDs en UniProt IDMapping no se 
+encuentran resultados. Por ese motivo se tomó la decisión de que los 
+ligandos sean ingresados en la consulta directamente con su ChEMBL ID.
 
 ## 🔗 Referencias Útiles
 

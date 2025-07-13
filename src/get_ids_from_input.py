@@ -21,6 +21,14 @@ def get_uniprot_ids_from_arguments(args):
     uniprot_ids = validar_uniprot_ids(uniprot_ids)
     return uniprot_ids
 
+def get_ligands_from_arguments(args):
+    ligands = []
+    if args.lig:
+        ligands += [u.strip() for u in args.lig.split(",") if u.strip()]
+    if args.lig_file:
+        ligands += cargar_ids_desde_archivo(args.lig_file, "Ligands")
+    return ligands
+
 def cargar_ids_desde_archivo(filepath, descripcion):
     if not os.path.isfile(filepath):
         raise FileNotFoundError(f"El archivo {filepath} no existe ({descripcion})")

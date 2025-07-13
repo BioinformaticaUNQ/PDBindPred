@@ -30,9 +30,12 @@ def fetch_pdb_info(pdb_id):
         "ligands": []
     }
 
-def get_binding_activities_for_target_from_chembl(chembl_target_id: str, affinity_types=None):
+def get_binding_activities_for_target_from_chembl(chembl_target_id: str, affinity_types=None, ligands=None):
     url = "https://www.ebi.ac.uk"
     query = f'/chembl/api/data/activity?target_chembl_id={chembl_target_id}&assay_type__exact=B'
+    if ligands != None:
+        query += '&molecule_chembl_id__in='
+        query += ','.join(ligands)
     headers = {"Accept": "application/xml"}
     print(f"📡 Enviando consulta a ChEMBL para obtener ligandos asociados a ChEMBL ID '{chembl_target_id}'...")
 
@@ -52,8 +55,8 @@ def get_binding_activities_for_target_from_chembl(chembl_target_id: str, affinit
         query = root.find('.//next').text
     return activities
 
-def get_ligands_from_chembl_target(chembl_target_id: str, affinity_types=None):
-    activities = get_binding_activities_for_target_from_chembl(chembl_target_id, affinity_types)
+def get_ligands_from_chembl_target(chembl_target_id: str, affinity_types=None, ligands=None):
+    activities = get_binding_activities_for_target_from_chembl(chembl_target_id, affinity_types, ligands)
     ligands = []
     for activity in activities:
         ligand_id = get_ligand_id_from_activity(activity)
@@ -123,7 +126,7 @@ def get_assay_id_from_activity(activity: Element):
     assay_id = assay_chembl_id_elem.text if assay_chembl_id_elem is not None else None
     return assay_id
 
-def process_pdb(pdb_id, affinity_types):
+def process_pdb(pdb_id, affinity_types, ligands_ids):
     package_dir = os.path.dirname(os.path.abspath(__file__))
     output_dir = os.path.join(package_dir, "output")
     os.makedirs(output_dir, exist_ok=True)
@@ -149,7 +152,7 @@ def process_pdb(pdb_id, affinity_types):
     ligands = []
     if result.get("chembl_id"):
         try:
-            ligands = get_ligands_from_chembl_target(result["chembl_id"], affinity_types=affinity_types)
+            ligands = get_ligands_from_chembl_target(result["chembl_id"], affinity_types=affinity_types, ligands = ligands_ids)
         except Exception as e:
             print(f"⚠️ Error al obtener ligandos desde ChEMBL: {e}")
 
@@ -167,7 +170,7 @@ def process_pdb(pdb_id, affinity_types):
     print(f"💾 Resultado guardado en {output_path}")
 
 
-def process_uniprot(uniprot_id, affinity_types):
+def process_uniprot(uniprot_id, affinity_types, ligands_ids):
     package_dir = os.path.dirname(os.path.abspath(__file__))
     output_dir = os.path.join(package_dir, "output")
     os.makedirs(output_dir, exist_ok=True)
@@ -205,7 +208,7 @@ def process_uniprot(uniprot_id, affinity_types):
     ligands = []
     if result.get("chembl_id"):
         try:
-            ligands = get_ligands_from_chembl_target(result["chembl_id"], affinity_types=affinity_types)
+            ligands = get_ligands_from_chembl_target(result["chembl_id"], affinity_types=affinity_types, ligands=ligands_ids)
         except Exception as e:
             print(f"⚠️ Error al obtener ligandos desde ChEMBL: {e}")
 

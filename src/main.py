@@ -1,5 +1,6 @@
 from src.create_parser import create_parser
-from src.get_ids_from_input import get_pdb_ids_from_arguments, get_uniprot_ids_from_arguments
+from src.get_ids_from_input import get_pdb_ids_from_arguments, get_uniprot_ids_from_arguments, \
+    get_ligands_from_arguments
 from src.pdb_handler import process_pdb, process_uniprot
 from src import config
 import time
@@ -17,7 +18,11 @@ def main():
     # Leer IDs UniProt
     uniprot_ids = get_uniprot_ids_from_arguments(args)
 
+    # Toma la afinidad
     affinity_types = args.aff.split(",") if args.aff else None
+
+    # Leer los ligandos
+    ligands_ids = get_ligands_from_arguments(args) if (args.lig or args.lig_file) else None
 
     # Validar límite de IDs permitidos (configurable)
     if len(uniprot_ids) > config.MAX_UNIPROT_IDS_PER_QUERY:
@@ -34,7 +39,7 @@ def main():
         print(f"🔍 Procesando {len(pdb_ids)} ID(s) de PDB...")
         for pdb_id in pdb_ids:
             try:
-                process_pdb(pdb_id, affinity_types)
+                process_pdb(pdb_id, affinity_types, ligands_ids)
                 time.sleep(config.CHEMBL_REQUEST_DELAY)
             except Exception as e:
                 print(f"❌ Error procesando PDB {pdb_id}: {e}")
@@ -43,7 +48,7 @@ def main():
         print(f"🔍 Procesando {len(uniprot_ids)} ID(s) de UniProt...")
         for uniprot_id in uniprot_ids:
             try:
-                process_uniprot(uniprot_id, affinity_types)
+                process_uniprot(uniprot_id, affinity_types, ligands_ids)
                 time.sleep(config.UNIPROT_REQUEST_DELAY)
             except Exception as e:
                 print(f"❌ Error procesando UniProt {uniprot_id}: {e}")
