@@ -4,7 +4,7 @@ from xml.etree.ElementTree import Element
 
 import requests
 import xml.etree.ElementTree as ET
-from src.get_ids_from_apis import get_uniprot_id_from_pdb_id, get_chembl_id_from_uniprot_id
+from src.get_ids_from_apis import get_uniprot_id_from_pdb_id, get_ids_from_uniprot_id
 from src import config
 
 def fetch_pdb_info(pdb_id):
@@ -21,8 +21,7 @@ def fetch_pdb_info(pdb_id):
 
     print(f"✅ Datos básicos obtenidos para PDB ID '{pdb_id}'")
     return {
-        "pdb_id": pdb_id,
-        "resolution": resolution,
+        "pdb_ids": [{'pdb_id': pdb_id, 'resolution': resolution}],
         "publication_year": year,
         "doi": doi,
         "uniprot_id": None,
@@ -139,7 +138,9 @@ def process_pdb(pdb_id, affinity_types):
     try:
         print(f"🔗 Buscando IDs UniProt y ChEMBL para PDB ID '{pdb_id}'...")
         uniprot_id = get_uniprot_id_from_pdb_id(pdb_id)
-        chembl_id = get_chembl_id_from_uniprot_id(uniprot_id)
+        id_data_from_uniprot = get_ids_from_uniprot_id(uniprot_id)
+        chembl_ids_data = next((id for id in id_data_from_uniprot if id['database'] == "ChEMBL"), None)
+        chembl_id = chembl_ids_data.get('id')
         result["uniprot_id"] = uniprot_id
         result["chembl_id"] = chembl_id
     except Exception as e:
@@ -179,14 +180,25 @@ def process_uniprot(uniprot_id, affinity_types):
     print(f"🔗 Procesando UniProt ID '{uniprot_id}'...")
     result = {
         "uniprot_id": uniprot_id,
+        "pdb_ids": [],
         "chembl_id": None,
         "sources": "ChEMBL, UniProt",
         "ligands": []
     }
 
     try:
-        chembl_id = get_chembl_id_from_uniprot_id(uniprot_id)
+        ids_data_from_uniprot = get_ids_from_uniprot_id(uniprot_id)
+        chembl_ids_data = next((id for id in ids_data_from_uniprot if id['database'] == "ChEMBL"), None)
+        chembl_id = chembl_ids_data.get('id')
+        pdb_ids_data = [id for id in ids_data_from_uniprot if id['database'] == "PDB"]
+        pdb_ids = []
+        for pdb_data in pdb_ids_data:
+            pdb = {}
+            pdb['pdb_id'] = pdb_data['id']
+            pdb['resolution'] =  next((properties for properties in pdb_data['properties'] if properties['key'] == "Resolution"), None)['value']
+            pdb_ids.append(pdb)
         result["chembl_id"] = chembl_id
+        result["pdb_ids"] = pdb_ids
     except Exception as e:
         print(f"⚠️ No se pudo obtener el ID ChEMBL: {e}")
 

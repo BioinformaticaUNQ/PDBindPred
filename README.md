@@ -44,7 +44,7 @@ Lee IDs de un archivo de texto y realiza las consultas correspondientes.
 
 ### 🔹 Consulta por UniProt ID
 ```bash
-python -m src.main --uniprot P12345
+python -m src.main --uniprot P05067 --aff Ki
 ```
 Consulta ligandos y afinidades para el UniProt ID `P12345`.
 
@@ -102,11 +102,15 @@ para quienes los usen.
 - ChEMBL permite consultas en su base de datos a través de sus propios 
 identificadores, por lo que las IDs de PDB o UniProt ingresadas en las 
 consultas a este programa deben ser traducidas a IDs de ChEMBL. Para 
-dicha tarea de decidió utilizar por su velocidad y practicidad la API 
-[IDMapping de UniProt](https://www.uniprot.org/id-mapping). En el 
-caso de las IDs de PDB, se hacen dos 
-consultas: primero se traduce la ID de PDB a ID Uniprot, y luego de 
-Uniprot a ID ChEMBL.
+dicha tarea de decidió utilizar por su velocidad y practicidad las APIs 
+de Uniprot: <br/>
+a) las IDs de PDB deben ser primero traducidas a IDs de UniProt, y 
+para este paso se utiliza el serivico [IDMapping de UniProt](https://www.uniprot.org/id-mapping).<br/> 
+b) las IDs de UniProt son pasadas a sus equivalentes en ChEMBL 
+usando la [API regular de Uniprot](https://www.uniprot.org/api-documentation/uniprotkb) 
+ya que de esta manera se obtienen también (para aquellas consultas 
+hechas directamente con ID de Uniprot) sus IDs de PDB y la resolución 
+de la proteína para cada una de ellas. 
 
 ## 🔗 Referencias Útiles
 
