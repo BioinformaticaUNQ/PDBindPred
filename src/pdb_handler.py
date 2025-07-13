@@ -63,6 +63,7 @@ def get_ligands_from_chembl_target(chembl_target_id: str, affinity_types=None, l
         canonical_smiles = get_canonical_smiles_from_activity(activity)
         value = get_affinity_value_from_activity(activity)
         type_ = get_affinity_value_type_from_activity(activity)
+        value_unit = get_affinity_value_unit_from_activity(activity)
         year = get_document_year_from_activity(activity)
         assay_id = get_assay_id_from_activity(activity)
 
@@ -72,7 +73,7 @@ def get_ligands_from_chembl_target(chembl_target_id: str, affinity_types=None, l
         if affinity_types and type_ not in affinity_types:
             continue
 
-        ligand_assay_data = get_ligand_assay_data(assay_id, type_, value, year)
+        ligand_assay_data = get_ligand_assay_data(assay_id, type_, value, value_unit, year)
 
         # Buscamos el ligando
         ligand = next((lig for lig in ligands if lig["chembl_id"] == ligand_id), None)
@@ -86,11 +87,12 @@ def get_ligands_from_chembl_target(chembl_target_id: str, affinity_types=None, l
     return ligands
 
 
-def get_ligand_assay_data(assay_id, type_, value, year):
+def get_ligand_assay_data(assay_id, type_, value, value_unit, year):
     ligand_assay_data = {"assay id": assay_id, "publication_year": year}
     # Agregamos el tipo como propiedad dinámica
+    value_type = type_ + " (" + value_unit + ")"
     try:
-        ligand_assay_data[type_] = float(value)
+        ligand_assay_data[value_type] = float(value)
     except ValueError:
         ligand_assay_data[type_] = value  # por si no es numérico
     return ligand_assay_data
@@ -115,6 +117,11 @@ def get_affinity_value_type_from_activity(activity: Element):
     type_elem = activity.find("standard_type")
     type_ = type_elem.text if type_elem is not None else None
     return type_
+
+def get_affinity_value_unit_from_activity(activity: Element):
+    unit_elem = activity.find("standard_units")
+    unit = unit_elem.text if unit_elem is not None else None
+    return unit
 
 def get_document_year_from_activity(activity: Element):
     year_elem = activity.find("document_year")
