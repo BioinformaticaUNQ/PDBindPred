@@ -90,7 +90,9 @@ def get_ligands_from_chembl_target(chembl_target_id: str, affinity_types=None, l
 def get_ligand_assay_data(assay_id, type_, value, value_unit, year):
     ligand_assay_data = {"assay id": assay_id, "publication_year": year}
     # Agregamos el tipo como propiedad dinámica
-    value_type = type_ + " (" + value_unit + ")"
+    value_type = type_
+    if value_unit != None:
+        value_type += " (" + value_unit + ")"
     try:
         ligand_assay_data[value_type] = float(value)
     except ValueError:
@@ -137,7 +139,14 @@ def process_pdb(pdb_id, affinity_types, ligands_ids):
     package_dir = os.path.dirname(os.path.abspath(__file__))
     output_dir = os.path.join(package_dir, "output")
     os.makedirs(output_dir, exist_ok=True)
-    output_path = os.path.join(output_dir, f"pdb_{pdb_id}.json")
+    output_path = os.path.join(output_dir, f"pdb_{pdb_id}")
+    if affinity_types != None:
+        output_path += '_'
+        output_path += ','.join(affinity_types)
+    if ligands_ids != None:
+        output_path += '_'
+        output_path += ','.join(ligands_ids)
+    output_path += '.json'
 
     if config.ENABLE_LOCAL_CACHE and os.path.isfile(output_path):
         print(f"📂 Resultado ya disponible localmente para PDB ID '{pdb_id}'. Se omitirá la consulta.")
@@ -181,7 +190,14 @@ def process_uniprot(uniprot_id, affinity_types, ligands_ids):
     package_dir = os.path.dirname(os.path.abspath(__file__))
     output_dir = os.path.join(package_dir, "output")
     os.makedirs(output_dir, exist_ok=True)
-    output_path = os.path.join(output_dir, f"uniprot_{uniprot_id}.json")
+    output_path = os.path.join(output_dir, f"uniprot_{uniprot_id}")
+    if affinity_types != None:
+        output_path += '_'
+        output_path += ','.join(affinity_types)
+    if ligands_ids != None:
+        output_path += '_'
+        output_path += ','.join(ligands_ids)
+    output_path += '.json'
 
     if config.ENABLE_LOCAL_CACHE and os.path.isfile(output_path):
         print(f"📂 Resultado ya disponible localmente para UniProt ID '{uniprot_id}'. Se omitirá la consulta.")
