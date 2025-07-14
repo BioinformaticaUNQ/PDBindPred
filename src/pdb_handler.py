@@ -36,6 +36,9 @@ def get_binding_activities_for_target_from_chembl(chembl_target_id: str, affinit
     if ligands != None:
         query += '&molecule_chembl_id__in='
         query += ','.join(ligands)
+    if affinity_types != None:
+        query += '&standard_type__in='
+        query += ','.join(affinity_types)
     headers = {"Accept": "application/xml"}
     print(f"📡 Enviando consulta a ChEMBL para obtener ligandos asociados a ChEMBL ID '{chembl_target_id}'...")
 
@@ -69,9 +72,9 @@ def get_ligands_from_chembl_target(chembl_target_id: str, affinity_types=None, l
 
         if not ligand_id or not assay_id or not type_ or not value:
             continue  # ignoramos datos incompletos
-
+        """
         if affinity_types and type_ not in affinity_types:
-            continue
+            continue"""
 
         ligand_assay_data = get_ligand_assay_data(assay_id, type_, value, value_unit, year)
 
