@@ -7,6 +7,14 @@ import time
 
 
 def main():
+    """
+    Función principal del programa.
+    Se encarga de:
+    - Parsear los argumentos de entrada.
+    - Validar los IDs ingresados.
+    - Procesar cada ID de PDB o UniProt, consultando fuentes externas.
+    - Guardar los resultados en archivos JSON.
+    """
     print("\n🚀 Inicio de ejecución de src\n")
     parser = create_parser()
 
@@ -57,12 +65,19 @@ def main():
 
 
 def validate_input(parser):
+    """
+    Valida que al menos uno de los argumentos requeridos haya sido ingresado. 
+    Lanza un error si no se proporciona ningún ID de PDB o UniProt.
+    """
     args = parser.parse_args()
     if not any([args.pdb, args.pdb_file, args.uniprot, args.uniprot_file]):
         parser.error()
     return args
 
 if __name__ == "__main__":
+    """
+    Punto de entrada del script cuando se ejecuta directamente.
+    """
     try:
         main()
     except Exception as e:

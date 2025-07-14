@@ -3,9 +3,19 @@ from argparse import RawTextHelpFormatter
 
 
 class CustomArgumentParser(argparse.ArgumentParser):
+    """
+    Subclase personalizada de ArgumentParser que cambia el título de las opciones
+    y redefine el comportamiento por defecto ante errores de argumentos.
+    """
     def _get_optionals_title(self):
+        """
+        Redefine el título por defecto del grupo de argumentos opcionales.
+        """
         return 'Opciones'
     def error(self, message):
+        """
+        Lanza una excepción con un mensaje personalizado cuando hay un error de argumentos.
+        """
         raise Exception("Los argumentos posibles son: --pdb, "
                         "--pdb-file, --uniprot, --uniprot-file, --aff "
                         "--lig, --lig-file. Para más "
@@ -15,6 +25,12 @@ class CustomArgumentParser(argparse.ArgumentParser):
 
 
 def create_parser():
+    """
+    Crea y configura un parser de argumentos para la línea de comandos,
+    con ayuda extendida y ejemplos de uso.
+    Retorna:
+        CustomArgumentParser: Parser configurado con los argumentos disponibles.
+    """
     parser = CustomArgumentParser(
         exit_on_error=False,
         description="src - Anotación básica de estructuras PDB",

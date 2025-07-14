@@ -8,6 +8,7 @@ from src.get_ids_from_apis import get_uniprot_id_from_pdb_id, get_data_from_unip
 from src import config
 
 def fetch_pdb_info(pdb_id):
+    """Consulta a la API de RCSB PDB para obtener información básica de una estructura, incluyendo resolución, año de publicación y DOI."""
     url = f"https://data.rcsb.org/rest/v1/core/entry/{pdb_id}"
     print(f"📡 Enviando consulta a RCSB PDB para obtener datos de PDB ID '{pdb_id}'...")
     response = requests.get(url, timeout=10)
@@ -31,6 +32,7 @@ def fetch_pdb_info(pdb_id):
     }
 
 def get_binding_activities_for_target_from_chembl(chembl_target_id: str, affinity_types=None, ligands=None):
+    """Consulta la API de ChEMBL para obtener las actividades de unión (binding) de un target dado, filtrando opcionalmente por tipos de afinidad y ligandos."""
     url = "https://www.ebi.ac.uk"
     query = f'/chembl/api/data/activity?target_chembl_id={chembl_target_id}&assay_type__exact=B'
     if ligands != None:
@@ -59,6 +61,7 @@ def get_binding_activities_for_target_from_chembl(chembl_target_id: str, affinit
     return activities
 
 def get_ligands_from_chembl_target(chembl_target_id: str, affinity_types=None, ligands=None):
+    """Procesa las actividades de un target de ChEMBL para agrupar información sobre los ligandos asociados, como sus afinidades, SMILES y año de publicación."""
     activities = get_binding_activities_for_target_from_chembl(chembl_target_id, affinity_types, ligands)
     ligands = []
     for activity in activities:
@@ -91,6 +94,7 @@ def get_ligands_from_chembl_target(chembl_target_id: str, affinity_types=None, l
 
 
 def get_ligand_assay_data(assay_id, type_, value, value_unit, year):
+    """Crea un diccionario con los datos de un ensayo para un ligando, incluyendo tipo de afinidad, valor, unidad y año."""
     ligand_assay_data = {"assay id": assay_id, "publication_year": year}
     # Agregamos el tipo como propiedad dinámica
     value_type = type_
@@ -104,41 +108,49 @@ def get_ligand_assay_data(assay_id, type_, value, value_unit, year):
 
 
 def get_ligand_id_from_activity(activity: Element):
+    """Extrae el ID ChEMBL del ligando desde una actividad en formato XML."""
     chembl_id_elem = activity.find("molecule_chembl_id")
     ligand_id = chembl_id_elem.text if chembl_id_elem is not None else None
     return ligand_id
 
 def get_canonical_smiles_from_activity(activity: Element):
+    """Extrae el SMILES canónico del ligando desde una actividad en formato XML."""
     canonical_smiles_elem = activity.find("canonical_smiles")
     canonical_smiles = canonical_smiles_elem.text if canonical_smiles_elem is not None else None
     return canonical_smiles
 
 def get_affinity_value_from_activity(activity: Element):
+    """Extrae el valor de afinidad desde una actividad en formato XML."""
     value_elem = activity.find("standard_value")
     value = value_elem.text if value_elem is not None else None
     return value
 
 def get_affinity_value_type_from_activity(activity: Element):
+    """Extrae la unidad del valor de afinidad desde una actividad en formato XML (ej. nM)."""
     type_elem = activity.find("standard_type")
     type_ = type_elem.text if type_elem is not None else None
     return type_
 
 def get_affinity_value_unit_from_activity(activity: Element):
+    """Extrae la unidad del valor de afinidad desde una actividad en formato XML (ej. nM)."""
     unit_elem = activity.find("standard_units")
     unit = unit_elem.text if unit_elem is not None else None
     return unit
 
 def get_document_year_from_activity(activity: Element):
+    """Extrae el año de publicación del documento asociado a una actividad en formato XML."""
     year_elem = activity.find("document_year")
     year = year_elem.text if year_elem is not None else None
     return (year)
 
 def get_assay_id_from_activity(activity: Element):
+    """Extrae el ID del ensayo (assay) desde una actividad en formato XML."""
     assay_chembl_id_elem = activity.find("assay_chembl_id")
     assay_id = assay_chembl_id_elem.text if assay_chembl_id_elem is not None else None
     return assay_id
 
 def process_pdb(pdb_id, affinity_types, ligands_ids):
+    """Procesa una ID de PDB: obtiene información estructural, mapea a UniProt y ChEMBL, consulta ligandos asociados y guarda el resultado en un archivo JSON."""
     package_dir = os.path.dirname(os.path.abspath(__file__))
     output_dir = os.path.join(package_dir, "output")
     os.makedirs(output_dir, exist_ok=True)
@@ -191,6 +203,7 @@ def process_pdb(pdb_id, affinity_types, ligands_ids):
 
 
 def process_uniprot(uniprot_id, affinity_types, ligands_ids):
+    """Procesa una ID de UniProt: obtiene mapeos a PDB y ChEMBL, consulta ligandos asociados y guarda el resultado en un archivo JSON."""
     package_dir = os.path.dirname(os.path.abspath(__file__))
     output_dir = os.path.join(package_dir, "output")
     os.makedirs(output_dir, exist_ok=True)
