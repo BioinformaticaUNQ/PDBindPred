@@ -12,8 +12,10 @@ class TestsGetIdsFromApis(unittest.TestCase):
 
     def test_get_id_data_from_uniprot_id(self):
         uniprot_id = "P61812"
-        ids_data = src.get_ids_from_apis.get_ids_from_uniprot_id(uniprot_id)
-        self.assertEqual(12, len(ids_data))
+        ids_data = src.get_ids_from_apis.get_data_from_uniprot_id(uniprot_id)
+        self.assertTrue('entryAudit' in ids_data.keys())
+        self.assertTrue('references' in ids_data.keys())
+        self.assertTrue('uniProtKBCrossReferences' in ids_data.keys())
 
 
 if __name__ == '__main__':

@@ -4,7 +4,7 @@ from xml.etree.ElementTree import Element
 
 import requests
 import xml.etree.ElementTree as ET
-from src.get_ids_from_apis import get_uniprot_id_from_pdb_id, get_ids_from_uniprot_id
+from src.get_ids_from_apis import get_uniprot_id_from_pdb_id, get_data_from_uniprot_id
 from src import config
 
 def fetch_pdb_info(pdb_id):
@@ -160,7 +160,8 @@ def process_pdb(pdb_id, affinity_types, ligands_ids):
     try:
         print(f"🔗 Buscando IDs UniProt y ChEMBL para PDB ID '{pdb_id}'...")
         uniprot_id = get_uniprot_id_from_pdb_id(pdb_id)
-        id_data_from_uniprot = get_ids_from_uniprot_id(uniprot_id)
+        data_from_uniprot = get_data_from_uniprot_id(uniprot_id)
+        id_data_from_uniprot = data_from_uniprot.get('uniProtKBCrossReferences')
         chembl_ids_data = next((id for id in id_data_from_uniprot if id['database'] == "ChEMBL"), None)
         chembl_id = chembl_ids_data.get('id')
         result["uniprot_id"] = uniprot_id
@@ -208,18 +209,21 @@ def process_uniprot(uniprot_id, affinity_types, ligands_ids):
 
     print(f"🔗 Procesando UniProt ID '{uniprot_id}'...")
     result = {
-        "uniprot_id": uniprot_id,
         "pdb_ids": [],
+        "publication_year": "",
+        "doi": "",
+        "uniprot_id": uniprot_id,
         "chembl_id": None,
-        "sources": "ChEMBL, UniProt",
+        "sources": "RCSB PDB, ChEMBL, UniProt",
         "ligands": []
     }
 
     try:
-        ids_data_from_uniprot = get_ids_from_uniprot_id(uniprot_id)
-        chembl_ids_data = next((id for id in ids_data_from_uniprot if id['database'] == "ChEMBL"), None)
+        data_from_uniprot = get_data_from_uniprot_id(uniprot_id)
+        id_data_from_uniprot = data_from_uniprot.get('uniProtKBCrossReferences')
+        chembl_ids_data = next((id for id in id_data_from_uniprot if id['database'] == "ChEMBL"), None)
         chembl_id = chembl_ids_data.get('id')
-        pdb_ids_data = [id for id in ids_data_from_uniprot if id['database'] == "PDB"]
+        pdb_ids_data = [id for id in id_data_from_uniprot if id['database'] == "PDB"]
         pdb_ids = []
         for pdb_data in pdb_ids_data:
             pdb = {}
@@ -228,6 +232,13 @@ def process_uniprot(uniprot_id, affinity_types, ligands_ids):
             pdb_ids.append(pdb)
         result["chembl_id"] = chembl_id
         result["pdb_ids"] = pdb_ids
+
+        year_data_from_uniprot = data_from_uniprot.get('entryAudit')
+        result["publication_year"] = year_data_from_uniprot["firstPublicDate"]
+
+        pub_data_from_uniprot = data_from_uniprot.get('references')[0]["citation"]
+        pub_doi_from_uniprot = next((cites for cites in pub_data_from_uniprot["citationCrossReferences"] if cites['database'] == "DOI"), None)['id']
+        result["doi"] = pub_doi_from_uniprot
     except Exception as e:
         print(f"⚠️ No se pudo obtener el ID ChEMBL: {e}")
 

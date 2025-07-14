@@ -24,12 +24,11 @@ def get_uniprot_id_from_pdb_id(pdb_id: str):
 Recibe una id UniProt como string. Realiza un request para mapear la id 
 en ChEMBL y devuelve la id ChEMBL como string para el mismo elemento.
 """
-def get_ids_from_uniprot_id(uniprot_id: str):
-    url = f"https://rest.uniprot.org/uniprotkb/{uniprot_id}?fields=xref_pdb%2Cxref_chembl"
+def get_data_from_uniprot_id(uniprot_id: str):
+    url = f"https://rest.uniprot.org/uniprotkb/{uniprot_id}?fields=xref_pdb%2Cxref_chembl%2Cdate_created%2Clit_doi_id"
     response = requests.get(url, timeout=10)
     data = response.json()
-    ids_data = data.get('uniProtKBCrossReferences')
-    return ids_data
+    return data
 
 """
 Dado un diccionario de parámetros estructurado según las indicaciones de 
