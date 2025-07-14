@@ -182,13 +182,17 @@ def process_pdb(pdb_id, affinity_types, ligands_ids):
         print(f"⚠️ No se pudieron obtener los IDs UniProt/ChEMBL: {e}")
 
     ligands = []
+    success = False
     if result.get("chembl_id"):
         try:
             ligands = get_ligands_from_chembl_target(result["chembl_id"], affinity_types=affinity_types, ligands = ligands_ids)
+            success = True
         except Exception as e:
             print(f"⚠️ Error al obtener ligandos desde ChEMBL: {e}")
 
     result["ligands"] = ligands
+    
+
     """
     # Guardar salida
     package_dir = os.path.dirname(os.path.abspath(__file__))
@@ -196,8 +200,17 @@ def process_pdb(pdb_id, affinity_types, ligands_ids):
     os.makedirs(output_dir, exist_ok=True)
     output_path = os.path.join(output_dir, f"pdb_{pdb_id}.json")
     """
-    with open(output_path, "w") as f:
-        json.dump(result, f, indent=4)
+    if success or ligands:
+        try:
+            with open(output_path, "w") as f:
+                json.dump(result, f, indent=4)
+            print(f"💾 Resultado guardado en {output_path}")
+        except Exception as e:
+            if os.path.exists(output_path):
+                os.remove(output_path)
+            print(f"⚠️ Error al guardar el archivo {output_path}. Archivo eliminado. Detalles: {e}")
+    else:
+        print(f"⚠️ No se generó archivo para {pdb_id} porque no se obtuvieron datos.")
 
     print(f"💾 Resultado guardado en {output_path}")
 
@@ -256,9 +269,12 @@ def process_uniprot(uniprot_id, affinity_types, ligands_ids):
         print(f"⚠️ No se pudo obtener el ID ChEMBL: {e}")
 
     ligands = []
+    success = False
+
     if result.get("chembl_id"):
         try:
             ligands = get_ligands_from_chembl_target(result["chembl_id"], affinity_types=affinity_types, ligands=ligands_ids)
+            success = True
         except Exception as e:
             print(f"⚠️ Error al obtener ligandos desde ChEMBL: {e}")
 
@@ -270,7 +286,16 @@ def process_uniprot(uniprot_id, affinity_types, ligands_ids):
     os.makedirs(output_dir, exist_ok=True)
     output_path = os.path.join(output_dir, f"uniprot_{uniprot_id}.json")
     """
-    with open(output_path, "w") as f:
-        json.dump(result, f, indent=4)
+    if success or ligands:
+        try:
+            with open(output_path, "w") as f:
+                json.dump(result, f, indent=4)
+            print(f"💾 Resultado guardado en {output_path}")
+        except Exception as e:
+            if os.path.exists(output_path):
+                os.remove(output_path)
+            print(f"⚠️ Error al guardar el archivo {output_path}. Archivo eliminado. Detalles: {e}")
+    else:
+        print(f"⚠️ No se generó archivo para {pdb_id} porque no se obtuvieron datos.")
 
     print(f"💾 Resultado guardado en {output_path}")
