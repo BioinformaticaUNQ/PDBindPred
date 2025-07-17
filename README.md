@@ -32,7 +32,7 @@ Consulta datos estructurales y ligandos para el PDB ID `1MQ8`.
 
 ### 🔹 Consulta múltiple por PDB IDs con afinidades filtradas
 ```bash
-python -m src.main --pdb 1MQ8,2VDU --aff Ki,Kd
+python -m src.main --pdb 1MQ8,6CCF --aff IC50,Kd
 ```
 Consulta múltiples PDB IDs, incluyendo solo afinidades tipo **Ki** y **Kd**.
 
@@ -53,7 +53,7 @@ su afinidad con los ligandos CHEMBL258114 y CHEMBL117198.
 ```bash
 python -m src.main --uniprot P05067 --aff Ki
 ```
-Consulta ligandos y afinidades para el UniProt ID `P12345`.
+Consulta ligandos y afinidades para el UniProt ID `P05067`.
 
 ### 🔹 Consulta desde archivo de IDs UniProt
 ```bash
