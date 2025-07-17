@@ -212,7 +212,6 @@ def process_pdb(pdb_id, affinity_types, ligands_ids):
     else:
         print(f"⚠️ No se generó archivo para {pdb_id} porque no se obtuvieron datos.")
 
-    print(f"💾 Resultado guardado en {output_path}")
 
 
 def process_uniprot(uniprot_id, affinity_types, ligands_ids):
@@ -296,6 +295,5 @@ def process_uniprot(uniprot_id, affinity_types, ligands_ids):
                 os.remove(output_path)
             print(f"⚠️ Error al guardar el archivo {output_path}. Archivo eliminado. Detalles: {e}")
     else:
-        print(f"⚠️ No se generó archivo para {pdb_id} porque no se obtuvieron datos.")
+        print(f"⚠️ No se generó archivo para {uniprot_id} porque no se obtuvieron datos.")
 
-    print(f"💾 Resultado guardado en {output_path}")
