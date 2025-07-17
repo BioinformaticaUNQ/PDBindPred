@@ -1,8 +1,10 @@
 import os
 import json
+from time import sleep
 from xml.etree.ElementTree import Element
 
 import requests
+import threading
 import xml.etree.ElementTree as ET
 from src.get_ids_from_apis import get_uniprot_id_from_pdb_id, get_data_from_uniprot_id
 from src import config
@@ -31,6 +33,11 @@ def fetch_pdb_info(pdb_id):
         "ligands": []
     }
 
+def print_function(stop_event):
+    while not stop_event.is_set():
+        print("Recuperando los resultados...")
+        sleep(10)
+
 def get_binding_activities_for_target_from_chembl(chembl_target_id: str, affinity_types=None, ligands=None):
     """Consulta la API de ChEMBL para obtener las actividades de unión (binding) de un target dado, filtrando opcionalmente por tipos de afinidad y ligandos."""
     url = "https://www.ebi.ac.uk"
@@ -47,7 +54,12 @@ def get_binding_activities_for_target_from_chembl(chembl_target_id: str, affinit
     activities = []
     while query is not None:
         url_query = url + query
+        should_stop = threading.Event()
+        thread = threading.Thread(target=print_function, args=[should_stop])
+        thread.start()
         response = requests.get(url_query, headers=headers, timeout=10)
+        should_stop.set()
+        thread.join()
         if response.status_code != 200:
             print(f"⚠️ No se pudo obtener datos desde ChEMBL para {chembl_target_id}")
             return []
