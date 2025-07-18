@@ -176,7 +176,8 @@ def process_pdb(pdb_id, affinity_types, ligands_ids):
     output_path += '.json'
 
     if config.ENABLE_LOCAL_CACHE and os.path.isfile(output_path):
-        print(f"📂 Resultado ya disponible localmente para PDB ID '{pdb_id}'. Se omitirá la consulta.")
+        print(f"📂 Resultado ya disponible localmente para PDB ID '{pdb_id}'. Ruta: {output_path}. Se omitirá la consulta.")
+
         return
 
     result = fetch_pdb_info(pdb_id)
@@ -241,7 +242,7 @@ def process_uniprot(uniprot_id, affinity_types, ligands_ids):
     output_path += '.json'
 
     if config.ENABLE_LOCAL_CACHE and os.path.isfile(output_path):
-        print(f"📂 Resultado ya disponible localmente para UniProt ID '{uniprot_id}'. Se omitirá la consulta.")
+        print(f"📂 Resultado ya disponible localmente para UniProt ID '{uniprot_id}'. Ruta: {output_path}. Se omitirá la consulta.")
         return
 
     print(f"🔗 Procesando UniProt ID '{uniprot_id}'...")
