@@ -259,6 +259,9 @@ def process_uniprot(uniprot_id, affinity_types, ligands_ids):
     try:
         data_from_uniprot = get_data_from_uniprot_id(uniprot_id)
         id_data_from_uniprot = data_from_uniprot.get('uniProtKBCrossReferences')
+        if not id_data_from_uniprot:
+            print(f"⚠️ UniProt ID '{uniprot_id}' no encontrado.")
+            return
         chembl_ids_data = next((id for id in id_data_from_uniprot if id['database'] == "ChEMBL"), None)
         chembl_id = chembl_ids_data.get('id')
         pdb_ids_data = [id for id in id_data_from_uniprot if id['database'] == "PDB"]
